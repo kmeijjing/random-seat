@@ -1,12 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import type {
-  CurrentDraft,
   DrawHistoryEntry,
   DrawOptions,
   DrawSettings,
   FixedSeat,
   Participant,
-  SavedState,
   SeatAssignment,
   SeatCell,
   SeatConfig,
@@ -16,23 +14,16 @@ import type {
 import { buildSeatTableText } from '../utils/export'
 import { addHistoryEntry } from '../utils/history'
 import {
-  countUsableSeats,
   cycleCellType,
   getCellById,
-  getRecommendedLayouts,
-  getSeatNumberMap,
-  getUsableSeatCells,
   updateLayoutDimensions,
 } from '../utils/layout'
-import { findDuplicateNames, parseParticipants } from '../utils/participants'
 import { generateAssignments } from '../utils/seating'
-import {
-  clearSavedState,
-  getDefaultState,
-  loadSavedState,
-  saveState,
-} from '../utils/storage'
+import { clearSavedState, saveState } from '../utils/storage'
 import { deleteTemplate, renameTemplate, upsertTemplate } from '../utils/templates'
+import { useSeatAppBrowser } from './useSeatAppBrowser'
+import { useSeatAppSelectors } from './useSeatAppSelectors'
+import { useSeatAppState } from './useSeatAppState'
 
 const DRAW_DURATION = 700
 
@@ -103,93 +94,65 @@ export type SeatAppActions = {
   onCloseDrawers: () => void
 }
 
+function cloneLayout(seatConfig: SeatConfig): SeatConfig {
+  return {
+    rows: seatConfig.rows,
+    columns: seatConfig.columns,
+    layout: {
+      rows: seatConfig.layout.rows,
+      columns: seatConfig.layout.columns,
+      cells: seatConfig.layout.cells.map((cell) => ({ ...cell })),
+    },
+  }
+}
+
 export function useSeatApp(): SeatAppState & SeatAppActions {
-  const [initialState] = useState(loadSavedState)
-  const [participantInput, setParticipantInput] = useState(
-    initialState.currentDraft.participantInput,
-  )
-  const [seatConfig, setSeatConfig] = useState(initialState.currentDraft.seatConfig)
-  const [fixedSeats, setFixedSeats] = useState(initialState.currentDraft.fixedSeats)
-  const [assignments, setAssignments] = useState<SeatAssignment[]>(
-    initialState.currentDraft.assignments,
-  )
-  const [updatedAt, setUpdatedAt] = useState(initialState.currentDraft.updatedAt)
-  const [drawSettings, setDrawSettings] = useState<DrawSettings>(
-    initialState.currentDraft.drawSettings,
-  )
-  const [templates, setTemplates] = useState<SeatTemplate[]>(initialState.templates)
-  const [history, setHistory] = useState<DrawHistoryEntry[]>(initialState.history)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedParticipantsForRedraw, setSelectedParticipantsForRedraw] = useState<string[]>([])
-  const [errorMessage, setErrorMessage] = useState('')
-  const [statusMessage, setStatusMessage] = useState('')
-  const [isDrawing, setIsDrawing] = useState(false)
-  const [fixedParticipantId, setFixedParticipantId] = useState('')
-  const [fixedCellId, setFixedCellId] = useState('')
-  const [isTemplateDrawerOpen, setIsTemplateDrawerOpen] = useState(false)
-  const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false)
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
-  const [isSeatEditorOpen, setIsSeatEditorOpen] = useState(false)
-  const [isRedrawPickerOpen, setIsRedrawPickerOpen] = useState(false)
+  const stateController = useSeatAppState()
+  const store = stateController.state
+  const selectors = useSeatAppSelectors(store)
+  const browser = useSeatAppBrowser()
   const drawTimerRef = useRef<number | null>(null)
+  const { setFixedSeats, setSelectedParticipantsForRedraw } = stateController
 
-  // --- derived values ---
-
-  const participants = useMemo(() => parseParticipants(participantInput), [participantInput])
-  const duplicateNames = useMemo(() => findDuplicateNames(participants), [participants])
-  const recommendedLayouts = useMemo(
-    () => getRecommendedLayouts(participants.length),
-    [participants.length],
-  )
-  const usableSeatCount = useMemo(() => countUsableSeats(seatConfig.layout), [seatConfig.layout])
-  const seatNumberMap = useMemo(() => getSeatNumberMap(seatConfig.layout), [seatConfig.layout])
-  const participantMap = useMemo(
-    () => new Map(participants.map((participant) => [participant.id, participant])),
-    [participants],
-  )
-  const assignmentMap = useMemo(
-    () => new Map(assignments.map((assignment) => [assignment.cellId, assignment])),
-    [assignments],
-  )
-  const hasAssignments = assignments.length > 0
-  const normalizedSearchQuery = searchQuery.trim().toLowerCase()
-  const matchingCellIds = useMemo(
-    () =>
-      new Set(
-        assignments
-          .filter((assignment) =>
-            normalizedSearchQuery
-              ? assignment.participant?.name.toLowerCase().includes(normalizedSearchQuery)
-              : false,
-          )
-          .map((assignment) => assignment.cellId),
-      ),
-    [assignments, normalizedSearchQuery],
-  )
-  const selectableSeatCells = useMemo(
-    () => getUsableSeatCells(seatConfig.layout),
-    [seatConfig.layout],
-  )
-  const redrawCandidates = useMemo(
-    () => assignments.filter((assignment) => assignment.participant && !assignment.isFixed),
-    [assignments],
-  )
-  const hasSearchResults = matchingCellIds.size > 0
-  const showNoSearchResults = Boolean(normalizedSearchQuery && !hasSearchResults)
-
-  // --- effects ---
+  useEffect(() => {
+    saveState({
+      currentDraft: {
+        participantInput: store.participantInput,
+        seatConfig: store.seatConfig,
+        fixedSeats: store.fixedSeats,
+        assignments: store.assignments,
+        updatedAt: store.updatedAt,
+        drawSettings: store.drawSettings,
+      },
+      templates: store.templates,
+      history: store.history,
+    })
+  }, [
+    store.assignments,
+    store.drawSettings,
+    store.fixedSeats,
+    store.history,
+    store.participantInput,
+    store.seatConfig,
+    store.templates,
+    store.updatedAt,
+  ])
 
   useEffect(() => {
     return () => {
-      if (drawTimerRef.current) {
-        window.clearTimeout(drawTimerRef.current)
+      if (drawTimerRef.current !== null) {
+        browser.clearTimer(drawTimerRef.current)
       }
     }
-  }, [])
+  }, [browser])
 
   useEffect(() => {
-    const participantIds = new Set(participants.map((participant) => participant.id))
-    const validSeatIds = new Set(selectableSeatCells.map((cell) => cell.id))
+    const participantIds = new Set(
+      selectors.participants.map((participant) => participant.id),
+    )
+    const validSeatIds = new Set(
+      selectors.selectableSeatCells.map((cell) => cell.id),
+    )
 
     setFixedSeats((current) => {
       const filtered = current.filter(
@@ -204,126 +167,81 @@ export function useSeatApp(): SeatAppState & SeatAppActions {
 
       return filtered.length === current.length ? current : filtered
     })
-  }, [participants, selectableSeatCells])
-
-  useEffect(() => {
-    const draftSeatConfig: SeatConfig = {
-      ...seatConfig,
-      recommendedLayouts,
-    }
-    const draft: CurrentDraft = {
-      participantInput,
-      seatConfig: draftSeatConfig,
-      fixedSeats,
-      assignments,
-      updatedAt,
-      drawSettings,
-    }
-    const stateToSave: SavedState = {
-      currentDraft: draft,
-      templates,
-      history,
-    }
-
-    saveState(stateToSave)
   }, [
-    assignments,
-    drawSettings,
-    fixedSeats,
-    history,
-    participantInput,
-    recommendedLayouts,
-    seatConfig,
-    templates,
-    updatedAt,
+    selectors.participants,
+    selectors.selectableSeatCells,
+    setFixedSeats,
+    setSelectedParticipantsForRedraw,
   ])
 
-  // --- internal helpers ---
-
-  function clearCurrentAssignments() {
-    setAssignments([])
-    setUpdatedAt(null)
-    setSelectedParticipantsForRedraw([])
-    setIsRedrawPickerOpen(false)
-  }
-
-  function resetDraftState() {
-    if (drawTimerRef.current) {
-      window.clearTimeout(drawTimerRef.current)
-      drawTimerRef.current = null
+  function clearDrawTimer() {
+    if (drawTimerRef.current === null) {
+      return
     }
 
-    const defaults = getDefaultState()
-
-    setParticipantInput(defaults.currentDraft.participantInput)
-    setSeatConfig(defaults.currentDraft.seatConfig)
-    setFixedSeats(defaults.currentDraft.fixedSeats)
-    setAssignments(defaults.currentDraft.assignments)
-    setUpdatedAt(defaults.currentDraft.updatedAt)
-    setDrawSettings(defaults.currentDraft.drawSettings)
-    setSearchQuery('')
-    setSelectedParticipantsForRedraw([])
-    setFixedParticipantId('')
-    setFixedCellId('')
-    setErrorMessage('')
-    setIsDrawing(false)
-    setIsRedrawPickerOpen(false)
+    browser.clearTimer(drawTimerRef.current)
+    drawTimerRef.current = null
   }
 
-  // --- actions ---
+  function abortPendingDraw() {
+    clearDrawTimer()
+    stateController.setIsDrawing(false)
+  }
+
+  function clearDraftAssignments() {
+    abortPendingDraw()
+    stateController.clearCurrentAssignments()
+  }
 
   function onParticipantInputChange(value: string) {
-    setParticipantInput(value)
-    clearCurrentAssignments()
-    setStatusMessage('')
-    setErrorMessage('')
+    stateController.setParticipantInput(value)
+    clearDraftAssignments()
+    stateController.setStatusMessage('')
+    stateController.setErrorMessage('')
   }
 
   function onDimensionChange(field: 'rows' | 'columns', rawValue: string) {
     const parsed = Math.max(1, Number.parseInt(rawValue, 10) || 1)
-    const nextRows = field === 'rows' ? parsed : seatConfig.rows
-    const nextColumns = field === 'columns' ? parsed : seatConfig.columns
+    const nextRows = field === 'rows' ? parsed : store.seatConfig.rows
+    const nextColumns = field === 'columns' ? parsed : store.seatConfig.columns
 
-    setSeatConfig((current) => ({
+    stateController.setSeatConfig((current) => ({
       rows: nextRows,
       columns: nextColumns,
       layout: updateLayoutDimensions(current.layout, nextRows, nextColumns),
-      recommendedLayouts,
     }))
-    clearCurrentAssignments()
-    setStatusMessage('')
-    setErrorMessage('')
+    clearDraftAssignments()
+    stateController.setStatusMessage('')
+    stateController.setErrorMessage('')
   }
 
   function onApplyRecommendation(rows: number, columns: number) {
-    setSeatConfig((current) => ({
+    stateController.setSeatConfig((current) => ({
       rows,
       columns,
       layout: updateLayoutDimensions(current.layout, rows, columns),
-      recommendedLayouts,
     }))
-    clearCurrentAssignments()
-    setStatusMessage(`${rows} x ${columns} 추천 좌석판을 적용했습니다.`)
-    setErrorMessage('')
+    clearDraftAssignments()
+    stateController.setStatusMessage(`${rows} x ${columns} 추천 좌석판을 적용했습니다.`)
+    stateController.setErrorMessage('')
   }
 
   function onCycleCellType(cellId: string) {
-    setSeatConfig((current) => ({
+    stateController.setSeatConfig((current) => ({
       ...current,
       layout: cycleCellType(current.layout, cellId),
-      recommendedLayouts,
     }))
-    clearCurrentAssignments()
-    setStatusMessage('')
-    setErrorMessage('')
+    clearDraftAssignments()
+    stateController.setStatusMessage('')
+    stateController.setErrorMessage('')
   }
 
   function onAddFixedSeat() {
-    const participant = participantMap.get(fixedParticipantId)
-    const seatCell = getCellById(seatConfig.layout, fixedCellId)
+    const participant = selectors.participantMap.get(store.fixedParticipantId)
+    const seatCell = getCellById(store.seatConfig.layout, store.fixedCellId)
 
     if (!participant || !seatCell || seatCell.type !== 'seat') {
-      setErrorMessage('고정할 학생과 실제 좌석을 먼저 선택해 주세요.')
+      stateController.setErrorMessage('고정할 학생과 실제 좌석을 먼저 선택해 주세요.')
       return
     }
 
@@ -333,178 +251,171 @@ export function useSeatApp(): SeatAppState & SeatAppActions {
       cellId: seatCell.id,
     }
 
-    setFixedSeats((current) => [
+    stateController.setFixedSeats((current) => [
       ...current.filter(
         (fixedSeat) =>
           fixedSeat.participantId !== participant.id && fixedSeat.cellId !== seatCell.id,
       ),
       nextFixedSeat,
     ])
-    setFixedParticipantId('')
-    setFixedCellId('')
-    clearCurrentAssignments()
-    setStatusMessage(`${participant.name} 학생을 ${seatCell.label}에 고정했습니다.`)
-    setErrorMessage('')
+    stateController.setFixedParticipantId('')
+    stateController.setFixedCellId('')
+    clearDraftAssignments()
+    stateController.setStatusMessage(`${participant.name} 학생을 ${seatCell.label}에 고정했습니다.`)
+    stateController.setErrorMessage('')
   }
 
   function onRemoveFixedSeat(participantId: string) {
-    setFixedSeats((current) =>
+    stateController.setFixedSeats((current) =>
       current.filter((fixedSeat) => fixedSeat.participantId !== participantId),
     )
-    clearCurrentAssignments()
-    setStatusMessage('고정석을 해제했습니다.')
-    setErrorMessage('')
-  }
-
-  function onToggleRedrawParticipant(participantId: string) {
-    setSelectedParticipantsForRedraw((current) =>
-      current.includes(participantId)
-        ? current.filter((value) => value !== participantId)
-        : [...current, participantId],
-    )
+    clearDraftAssignments()
+    stateController.setStatusMessage('고정석을 해제했습니다.')
+    stateController.setErrorMessage('')
   }
 
   function onResetCurrentDraft() {
-    resetDraftState()
-    setStatusMessage('')
+    abortPendingDraw()
+    stateController.resetCurrentDraft()
   }
 
   function onClearAllStorage() {
-    if (!window.confirm('현재 초안, 템플릿, 이력을 모두 삭제할까요?')) {
+    if (!browser.confirm('현재 초안, 템플릿, 이력을 모두 삭제할까요?')) {
       return
     }
 
-    resetDraftState()
-    setTemplates([])
-    setHistory([])
-    setStatusMessage('로컬 저장 데이터를 모두 지웠습니다.')
+    abortPendingDraw()
+    stateController.clearStoredData()
+    stateController.setStatusMessage('로컬 저장 데이터를 모두 지웠습니다.')
     clearSavedState()
   }
 
   function onRunDraw(redrawMode: 'all' | 'selected') {
-    setErrorMessage('')
-    setStatusMessage('')
+    stateController.setErrorMessage('')
+    stateController.setStatusMessage('')
 
-    if (participants.length === 0) {
-      setErrorMessage('참여자 이름을 한 명 이상 입력해 주세요.')
+    if (selectors.participants.length === 0) {
+      stateController.setErrorMessage('참여자 이름을 한 명 이상 입력해 주세요.')
       return
     }
 
-    if (participants.length > usableSeatCount) {
-      setErrorMessage('참여자 수가 사용 가능한 좌석 수보다 많습니다.')
+    if (selectors.participants.length > selectors.usableSeatCount) {
+      stateController.setErrorMessage('참여자 수가 사용 가능한 좌석 수보다 많습니다.')
       return
     }
 
     if (redrawMode === 'selected') {
-      if (!hasAssignments) {
-        setErrorMessage('일부만 다시 뽑기는 먼저 전체 자리 뽑기를 완료한 뒤 사용할 수 있습니다.')
+      if (!selectors.hasAssignments) {
+        stateController.setErrorMessage(
+          '일부만 다시 뽑기는 먼저 전체 자리 뽑기를 완료한 뒤 사용할 수 있습니다.',
+        )
         return
       }
 
-      if (selectedParticipantsForRedraw.length === 0) {
-        setErrorMessage('다시 뽑을 학생을 한 명 이상 선택해 주세요.')
+      if (store.selectedParticipantsForRedraw.length === 0) {
+        stateController.setErrorMessage('다시 뽑을 학생을 한 명 이상 선택해 주세요.')
         return
       }
     }
 
-    setDrawSettings((current) => ({
+    stateController.setDrawSettings((current) => ({
       ...current,
       redrawMode,
     }))
 
     const drawOptions: DrawOptions = {
-      ...drawSettings,
+      ...store.drawSettings,
       redrawMode,
       selectedParticipantIds:
-        redrawMode === 'selected' ? selectedParticipantsForRedraw : [],
+        redrawMode === 'selected' ? store.selectedParticipantsForRedraw : [],
     }
 
     let nextAssignments: SeatAssignment[]
 
     try {
       nextAssignments = generateAssignments({
-        participants,
-        layout: seatConfig.layout,
-        fixedSeats,
-        history,
+        participants: selectors.participants,
+        layout: store.seatConfig.layout,
+        fixedSeats: store.fixedSeats,
+        history: store.history,
         drawOptions,
-        currentAssignments: assignments,
+        currentAssignments: store.assignments,
       })
     } catch (error) {
-      setErrorMessage(
+      stateController.setErrorMessage(
         error instanceof Error ? error.message : '자리 뽑기 중 오류가 발생했습니다.',
       )
       return
     }
 
-    setIsDrawing(true)
+    stateController.setIsDrawing(true)
+    clearDrawTimer()
 
-    if (drawTimerRef.current) {
-      window.clearTimeout(drawTimerRef.current)
-    }
-
-    drawTimerRef.current = window.setTimeout(() => {
+    drawTimerRef.current = browser.startTimer(() => {
       const timestamp = new Date().toISOString()
       const historyEntry: DrawHistoryEntry = {
         id: crypto.randomUUID(),
         timestamp,
         assignments: structuredClone(nextAssignments),
-        participantsSnapshot: participants.map((participant) => ({ ...participant })),
+        participantsSnapshot: selectors.participants.map((participant) => ({ ...participant })),
         layoutSnapshot: {
-          rows: seatConfig.layout.rows,
-          columns: seatConfig.layout.columns,
-          cells: seatConfig.layout.cells.map((cell) => ({ ...cell })),
+          rows: store.seatConfig.layout.rows,
+          columns: store.seatConfig.layout.columns,
+          cells: store.seatConfig.layout.cells.map((cell) => ({ ...cell })),
         },
-        fixedSeatsSnapshot: structuredClone(fixedSeats),
+        fixedSeatsSnapshot: structuredClone(store.fixedSeats),
         optionsUsed: {
           ...drawOptions,
         },
       }
 
-      setAssignments(nextAssignments)
-      setUpdatedAt(timestamp)
-      setHistory((current) => addHistoryEntry(current, historyEntry))
-      setIsDrawing(false)
-      setStatusMessage(
+      drawTimerRef.current = null
+      stateController.setAssignments(nextAssignments)
+      stateController.setUpdatedAt(timestamp)
+      stateController.setHistory((current) => addHistoryEntry(current, historyEntry))
+      stateController.setIsDrawing(false)
+      stateController.setStatusMessage(
         redrawMode === 'selected'
           ? '선택한 학생들만 다시 뽑았습니다.'
           : '자리 뽑기를 완료했습니다.',
       )
+
       if (redrawMode === 'all') {
-        setSelectedParticipantsForRedraw([])
+        stateController.setSelectedParticipantsForRedraw([])
       }
-      setIsRedrawPickerOpen(false)
+
+      stateController.setIsRedrawPickerOpen(false)
     }, DRAW_DURATION)
   }
 
   async function onCopyResult() {
-    if (!hasAssignments) {
-      setErrorMessage('복사할 자리표가 아직 없습니다.')
+    if (!selectors.hasAssignments) {
+      stateController.setErrorMessage('복사할 자리표가 아직 없습니다.')
       return
     }
 
-    const text = buildSeatTableText(seatConfig.layout, assignments)
+    const text = buildSeatTableText(store.seatConfig.layout, store.assignments)
 
     try {
-      await navigator.clipboard.writeText(text)
-      setStatusMessage('자리표를 텍스트로 복사했습니다.')
-      setErrorMessage('')
+      await browser.copyText(text)
+      stateController.setStatusMessage('자리표를 텍스트로 복사했습니다.')
+      stateController.setErrorMessage('')
     } catch {
-      setErrorMessage('클립보드 복사에 실패했습니다.')
+      stateController.setErrorMessage('클립보드 복사에 실패했습니다.')
     }
   }
 
   function onPrint() {
-    if (!hasAssignments) {
-      setErrorMessage('인쇄할 자리표가 아직 없습니다.')
+    if (!selectors.hasAssignments) {
+      stateController.setErrorMessage('인쇄할 자리표가 아직 없습니다.')
       return
     }
 
-    window.print()
+    browser.print()
   }
 
   function onSaveTemplate() {
-    const name = window.prompt('저장할 템플릿 이름을 입력해 주세요.', '새 템플릿')
+    const name = browser.prompt('저장할 템플릿 이름을 입력해 주세요.', '새 템플릿')
 
     if (!name || !name.trim()) {
       return
@@ -514,70 +425,71 @@ export function useSeatApp(): SeatAppState & SeatAppActions {
     const template: SeatTemplate = {
       id: crypto.randomUUID(),
       name: name.trim(),
-      participantInput,
-      seatConfig: structuredClone({
-        ...seatConfig,
-        recommendedLayouts,
-      }),
-      fixedSeats: structuredClone(fixedSeats),
+      participantInput: store.participantInput,
+      seatConfig: cloneLayout(store.seatConfig),
+      fixedSeats: structuredClone(store.fixedSeats),
       createdAt: now,
       updatedAt: now,
     }
 
-    setTemplates((current) => upsertTemplate(current, template))
-    setStatusMessage(`"${template.name}" 템플릿을 저장했습니다.`)
-    setErrorMessage('')
+    stateController.setTemplates((current) => upsertTemplate(current, template))
+    stateController.setStatusMessage(`"${template.name}" 템플릿을 저장했습니다.`)
+    stateController.setErrorMessage('')
   }
 
   function onLoadTemplate(template: SeatTemplate) {
-    if (!window.confirm(`"${template.name}" 템플릿을 현재 초안에 불러올까요?`)) {
+    if (!browser.confirm(`"${template.name}" 템플릿을 현재 초안에 불러올까요?`)) {
       return
     }
 
-    setParticipantInput(template.participantInput)
-    setSeatConfig(structuredClone(template.seatConfig))
-    setFixedSeats(structuredClone(template.fixedSeats))
-    setAssignments([])
-    setUpdatedAt(null)
-    setSelectedParticipantsForRedraw([])
-    setSearchQuery('')
-    setStatusMessage(`"${template.name}" 템플릿을 불러왔습니다.`)
-    setErrorMessage('')
-    setIsTemplateDrawerOpen(false)
-    setIsRedrawPickerOpen(false)
+    abortPendingDraw()
+    stateController.setParticipantInput(template.participantInput)
+    stateController.setSeatConfig(cloneLayout(template.seatConfig))
+    stateController.setFixedSeats(structuredClone(template.fixedSeats))
+    stateController.setAssignments([])
+    stateController.setUpdatedAt(null)
+    stateController.setSelectedParticipantsForRedraw([])
+    stateController.setSearchQuery('')
+    stateController.setStatusMessage(`"${template.name}" 템플릿을 불러왔습니다.`)
+    stateController.setErrorMessage('')
+    stateController.setIsTemplateDrawerOpen(false)
+    stateController.setIsRedrawPickerOpen(false)
   }
 
   function onRenameTemplate(template: SeatTemplate) {
-    const nextName = window.prompt('새 템플릿 이름을 입력해 주세요.', template.name)
+    const nextName = browser.prompt('새 템플릿 이름을 입력해 주세요.', template.name)
 
     if (!nextName || !nextName.trim()) {
       return
     }
 
-    setTemplates((current) => renameTemplate(current, template.id, nextName.trim()))
-    setStatusMessage('템플릿 이름을 변경했습니다.')
-    setErrorMessage('')
+    stateController.setTemplates((current) =>
+      renameTemplate(current, template.id, nextName.trim()),
+    )
+    stateController.setStatusMessage('템플릿 이름을 변경했습니다.')
+    stateController.setErrorMessage('')
   }
 
   function onDeleteTemplate(template: SeatTemplate) {
-    if (!window.confirm(`"${template.name}" 템플릿을 삭제할까요?`)) {
+    if (!browser.confirm(`"${template.name}" 템플릿을 삭제할까요?`)) {
       return
     }
 
-    setTemplates((current) => deleteTemplate(current, template.id))
-    setStatusMessage('템플릿을 삭제했습니다.')
-    setErrorMessage('')
+    stateController.setTemplates((current) => deleteTemplate(current, template.id))
+    stateController.setStatusMessage('템플릿을 삭제했습니다.')
+    stateController.setErrorMessage('')
   }
 
   function onLoadHistory(entry: DrawHistoryEntry) {
-    if (!window.confirm('이 이력 상태를 현재 작업 화면에 불러올까요?')) {
+    if (!browser.confirm('이 이력 상태를 현재 작업 화면에 불러올까요?')) {
       return
     }
 
-    setParticipantInput(
+    abortPendingDraw()
+    stateController.setParticipantInput(
       entry.participantsSnapshot.map((participant) => participant.name).join('\n'),
     )
-    setSeatConfig({
+    stateController.setSeatConfig({
       rows: entry.layoutSnapshot.rows,
       columns: entry.layoutSnapshot.columns,
       layout: {
@@ -585,105 +497,102 @@ export function useSeatApp(): SeatAppState & SeatAppActions {
         columns: entry.layoutSnapshot.columns,
         cells: entry.layoutSnapshot.cells.map((cell) => ({ ...cell })),
       },
-      recommendedLayouts: getRecommendedLayouts(entry.participantsSnapshot.length),
     })
-    setFixedSeats(structuredClone(entry.fixedSeatsSnapshot))
-    setAssignments(structuredClone(entry.assignments))
-    setUpdatedAt(entry.timestamp)
-    setSelectedParticipantsForRedraw([])
-    setSearchQuery('')
-    setStatusMessage('이력 결과를 현재 화면에 불러왔습니다.')
-    setErrorMessage('')
-    setIsHistoryDrawerOpen(false)
-    setIsRedrawPickerOpen(false)
-  }
-
-  function onOpenTemplateDrawer() {
-    setIsTemplateDrawerOpen(true)
-    setIsHistoryDrawerOpen(false)
-  }
-
-  function onOpenHistoryDrawer() {
-    setIsHistoryDrawerOpen(true)
-    setIsTemplateDrawerOpen(false)
-  }
-
-  function onCloseDrawers() {
-    setIsTemplateDrawerOpen(false)
-    setIsHistoryDrawerOpen(false)
+    stateController.setFixedSeats(structuredClone(entry.fixedSeatsSnapshot))
+    stateController.setAssignments(structuredClone(entry.assignments))
+    stateController.setUpdatedAt(entry.timestamp)
+    stateController.setSelectedParticipantsForRedraw([])
+    stateController.setSearchQuery('')
+    stateController.setStatusMessage('이력 결과를 현재 화면에 불러왔습니다.')
+    stateController.setErrorMessage('')
+    stateController.setIsHistoryDrawerOpen(false)
+    stateController.setIsRedrawPickerOpen(false)
   }
 
   return {
-    // state
-    participantInput,
-    participants,
-    duplicateNames,
-    seatConfig,
-    recommendedLayouts,
-    usableSeatCount,
-    seatNumberMap,
-    selectableSeatCells,
-    fixedSeats,
-    assignments,
-    assignmentMap,
-    hasAssignments,
-    updatedAt,
-    drawSettings,
-    templates,
-    history,
-    searchQuery,
-    matchingCellIds,
-    showNoSearchResults,
-    selectedParticipantsForRedraw,
-    redrawCandidates,
-    errorMessage,
-    statusMessage,
-    isDrawing,
-    fixedParticipantId,
-    fixedCellId,
-    isTemplateDrawerOpen,
-    isHistoryDrawerOpen,
-    isAdvancedOpen,
-    isSeatEditorOpen,
-    isRedrawPickerOpen,
-
-    // actions
+    participantInput: store.participantInput,
+    participants: selectors.participants,
+    duplicateNames: selectors.duplicateNames,
+    seatConfig: store.seatConfig,
+    recommendedLayouts: selectors.recommendedLayouts,
+    usableSeatCount: selectors.usableSeatCount,
+    seatNumberMap: selectors.seatNumberMap,
+    selectableSeatCells: selectors.selectableSeatCells,
+    fixedSeats: store.fixedSeats,
+    assignments: store.assignments,
+    assignmentMap: selectors.assignmentMap,
+    hasAssignments: selectors.hasAssignments,
+    updatedAt: store.updatedAt,
+    drawSettings: store.drawSettings,
+    templates: store.templates,
+    history: store.history,
+    searchQuery: store.searchQuery,
+    matchingCellIds: selectors.matchingCellIds,
+    showNoSearchResults: selectors.showNoSearchResults,
+    selectedParticipantsForRedraw: store.selectedParticipantsForRedraw,
+    redrawCandidates: selectors.redrawCandidates,
+    errorMessage: store.errorMessage,
+    statusMessage: store.statusMessage,
+    isDrawing: store.isDrawing,
+    fixedParticipantId: store.fixedParticipantId,
+    fixedCellId: store.fixedCellId,
+    isTemplateDrawerOpen: store.isTemplateDrawerOpen,
+    isHistoryDrawerOpen: store.isHistoryDrawerOpen,
+    isAdvancedOpen: store.isAdvancedOpen,
+    isSeatEditorOpen: store.isSeatEditorOpen,
+    isRedrawPickerOpen: store.isRedrawPickerOpen,
     onParticipantInputChange,
     onDimensionChange,
     onApplyRecommendation,
     onCycleCellType,
     onAddFixedSeat,
     onRemoveFixedSeat,
-    onFixedParticipantChange: setFixedParticipantId,
-    onFixedCellChange: setFixedCellId,
+    onFixedParticipantChange: stateController.setFixedParticipantId,
+    onFixedCellChange: stateController.setFixedCellId,
     onAvoidPreviousSeatChange: (checked: boolean) =>
-      setDrawSettings((current) => ({ ...current, avoidPreviousSeat: checked })),
+      stateController.setDrawSettings((current) => ({
+        ...current,
+        avoidPreviousSeat: checked,
+      })),
     onBalanceZonesChange: (checked: boolean) =>
-      setDrawSettings((current) => ({ ...current, balanceZones: checked })),
-    onToggleAdvanced: () => setIsAdvancedOpen((current) => !current),
-    onToggleSeatEditor: () => setIsSeatEditorOpen((current) => !current),
+      stateController.setDrawSettings((current) => ({
+        ...current,
+        balanceZones: checked,
+      })),
+    onToggleAdvanced: () => stateController.setIsAdvancedOpen((current) => !current),
+    onToggleSeatEditor: () => stateController.setIsSeatEditorOpen((current) => !current),
     onRunDraw,
     onResetCurrentDraft,
     onClearAllStorage,
     onCopyResult,
     onPrint,
-    onSearchQueryChange: setSearchQuery,
-    onToggleRedrawPicker: () => setIsRedrawPickerOpen((current) => !current),
-    onToggleRedrawParticipant,
+    onSearchQueryChange: stateController.setSearchQuery,
+    onToggleRedrawPicker: () =>
+      stateController.setIsRedrawPickerOpen((current) => !current),
+    onToggleRedrawParticipant: stateController.toggleSelectedParticipantForRedraw,
     onSelectAllForRedraw: () =>
-      setSelectedParticipantsForRedraw(
-        redrawCandidates
+      stateController.setSelectedParticipantsForRedraw(
+        selectors.redrawCandidates
           .filter((assignment) => assignment.participant)
           .map((assignment) => assignment.participant!.id),
       ),
-    onDeselectAllForRedraw: () => setSelectedParticipantsForRedraw([]),
+    onDeselectAllForRedraw: () => stateController.setSelectedParticipantsForRedraw([]),
     onSaveTemplate,
     onLoadTemplate,
     onRenameTemplate,
     onDeleteTemplate,
     onLoadHistory,
-    onOpenTemplateDrawer,
-    onOpenHistoryDrawer,
-    onCloseDrawers,
+    onOpenTemplateDrawer: () => {
+      stateController.setIsTemplateDrawerOpen(true)
+      stateController.setIsHistoryDrawerOpen(false)
+    },
+    onOpenHistoryDrawer: () => {
+      stateController.setIsHistoryDrawerOpen(true)
+      stateController.setIsTemplateDrawerOpen(false)
+    },
+    onCloseDrawers: () => {
+      stateController.setIsTemplateDrawerOpen(false)
+      stateController.setIsHistoryDrawerOpen(false)
+    },
   }
 }

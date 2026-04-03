@@ -36,7 +36,6 @@ export type SeatConfig = {
   rows: number
   columns: number
   layout: SeatLayout
-  recommendedLayouts: SeatRecommendation[]
 }
 
 export type FixedSeat = {
