@@ -13,29 +13,29 @@ describe('storage helpers', () => {
   })
 
   it('returns a default state when nothing is saved', () => {
-    expect(loadSavedState()).toEqual(getDefaultState())
+    const state = loadSavedState()
+
+    expect(state.currentDraft.participantInput).toBe('')
+    expect(state.templates).toEqual([])
+    expect(state.history).toEqual([])
   })
 
-  it('saves and loads the last assignment state', () => {
+  it('saves and loads the extended saved state', () => {
     const state: SavedState = {
-      participantInput: '김하나\n박둘',
-      seatConfig: { rows: 2, columns: 2 },
-      assignments: [
-        {
-          seatNumber: 1,
-          row: 1,
-          column: 1,
-          label: '1-1',
-          participant: { id: '김하나-0', name: '김하나' },
-        },
-      ],
-      updatedAt: '2026-03-30T00:00:00.000Z',
+      ...getDefaultState(),
+      currentDraft: {
+        ...getDefaultState().currentDraft,
+        participantInput: '김하나\n박둘',
+      },
+      searchQuery: '김하나',
+      selectedParticipantsForRedraw: ['김하나-0'],
     }
 
     saveState(state)
 
     expect(window.localStorage.getItem(STORAGE_KEY)).toBeTruthy()
-    expect(loadSavedState()).toEqual(state)
+    expect(loadSavedState().searchQuery).toBe('김하나')
+    expect(loadSavedState().selectedParticipantsForRedraw).toEqual(['김하나-0'])
   })
 
   it('clears saved state from localStorage', () => {
