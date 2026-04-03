@@ -1,4 +1,32 @@
 import type { DrawSettings, FixedSeat, SeatAssignment, SeatConfig } from '../types'
+import {
+  badgeClass,
+  buttonRowClass,
+  checkboxChipClass,
+  emptyResultClass,
+  emptyTitleClass,
+  fieldLabelClass,
+  ghostButtonClass,
+  headRowClass,
+  helperTextClass,
+  panelTitleClass,
+  primaryButtonClass,
+  resultMetaClass,
+  resultPanelClass,
+  resultSeatGridClass,
+  resultToolbarClass,
+  searchFieldClass,
+  seatBoardClass,
+  seatCardClass,
+  seatCardFixedClass,
+  seatCardHighlightClass,
+  seatCardInactiveClass,
+  seatGridClass,
+  seatGridDrawingClass,
+  seatLabelClass,
+  sectionKickerClass,
+  subsectionClass,
+} from './ui'
 
 type ResultPanelProps = {
   assignments: SeatAssignment[]
@@ -50,18 +78,18 @@ export function ResultPanel({
   const hasAssignments = assignments.length > 0
 
   return (
-    <section className="result-panel result-panel-focus">
-      <div className="panel-head panel-head-result">
+    <section className={resultPanelClass}>
+      <div className={headRowClass}>
         <div>
-          <p className="section-kicker">결과</p>
-          <h2>자리표</h2>
+          <p className={sectionKickerClass}>결과</p>
+          <h2 className={panelTitleClass}>자리표</h2>
         </div>
-        <span className="badge">{hasAssignments ? `${assignments.length}명 배정` : '결과 대기'}</span>
+        <span className={badgeClass}>{hasAssignments ? `${assignments.length}명 배정` : '결과 대기'}</span>
       </div>
 
-      <div className="result-toolbar result-toolbar-simple">
-        <label className="field search-field">
-          <span>이름 검색</span>
+      <div className={resultToolbarClass}>
+        <label className={searchFieldClass}>
+          <span className={fieldLabelClass}>이름 검색</span>
           <input
             type="search"
             value={searchQuery}
@@ -71,11 +99,11 @@ export function ResultPanel({
           />
         </label>
 
-        <div className="toolbar-actions">
-          <button type="button" className="ghost-button" onClick={onCopyResult} disabled={!hasAssignments}>
+        <div className={buttonRowClass}>
+          <button type="button" className={ghostButtonClass} onClick={onCopyResult} disabled={!hasAssignments}>
             복사
           </button>
-          <button type="button" className="ghost-button" onClick={onPrint} disabled={!hasAssignments}>
+          <button type="button" className={ghostButtonClass} onClick={onPrint} disabled={!hasAssignments}>
             인쇄
           </button>
         </div>
@@ -83,7 +111,7 @@ export function ResultPanel({
 
       {hasAssignments ? (
         <>
-          <div className="result-meta">
+          <div className={resultMetaClass}>
             <span>마지막 결과: {updatedAtLabel}</span>
             <span>
               {drawSettings.avoidPreviousSeat ? '지난 자리 피하기' : '완전 랜덤'}
@@ -92,13 +120,13 @@ export function ResultPanel({
             </span>
           </div>
 
-          <div className="redraw-actions">
-            <button type="button" className="ghost-button" onClick={onRunDrawAll} disabled={isDrawing}>
+          <div className={`${buttonRowClass} print:hidden`}>
+            <button type="button" className={ghostButtonClass} onClick={onRunDrawAll} disabled={isDrawing}>
               전체 다시 뽑기
             </button>
             <button
               type="button"
-              className="ghost-button"
+              className={ghostButtonClass}
               onClick={onToggleRedrawPicker}
               disabled={isDrawing || redrawCandidates.length === 0}
             >
@@ -107,14 +135,14 @@ export function ResultPanel({
           </div>
 
           {isRedrawPickerOpen ? (
-            <div className="subsection redraw-picker">
-              <div className="subsection-head">
+            <div className={`${subsectionClass} print:hidden`}>
+              <div className={headRowClass}>
                 <strong>다시 뽑을 학생 선택</strong>
-                <span>{selectedParticipantsForRedraw.length}명 선택</span>
+                <span className="text-[0.76rem] text-slate-500">{selectedParticipantsForRedraw.length}명 선택</span>
               </div>
-              <div className="checkbox-list">
+              <div className={buttonRowClass}>
                 {redrawCandidates.map((assignment) => (
-                  <label key={assignment.participant!.id} className="checkbox-chip">
+                  <label key={assignment.participant!.id} className={checkboxChipClass}>
                     <input
                       type="checkbox"
                       checked={selectedParticipantsForRedraw.includes(assignment.participant!.id)}
@@ -124,10 +152,10 @@ export function ResultPanel({
                   </label>
                 ))}
               </div>
-              <div className="inline-actions">
+              <div className={buttonRowClass}>
                 <button
                   type="button"
-                  className="primary-button"
+                  className={primaryButtonClass}
                   onClick={onRunDrawSelected}
                   disabled={isDrawing}
                 >
@@ -137,11 +165,11 @@ export function ResultPanel({
             </div>
           ) : null}
 
-          {showNoSearchResults ? <p className="helper-text">검색 결과가 없습니다.</p> : null}
+          {showNoSearchResults ? <p className={helperTextClass}>검색 결과가 없습니다.</p> : null}
 
-          <div className="seat-board">
+          <div className={seatBoardClass}>
             <div
-              className={`seat-grid result-seat-grid ${isDrawing ? 'seat-grid-drawing' : ''}`}
+              className={`${seatGridClass} ${resultSeatGridClass} ${isDrawing ? seatGridDrawingClass : ''}`}
               style={{
                 gridTemplateColumns: `repeat(${seatConfig.columns}, minmax(118px, 1fr))`,
               }}
@@ -154,10 +182,10 @@ export function ResultPanel({
 
                 if (cell.type !== 'seat') {
                   return (
-                    <article key={cell.id} className={`seat-card seat-card-${cell.type}`}>
-                      <span className="seat-label">{cell.label}</span>
+                    <article key={cell.id} className={`${seatCardClass} ${seatCardInactiveClass}`}>
+                      <span className={seatLabelClass}>{cell.label}</span>
                       <strong>{cell.type === 'aisle' ? '통로' : '비활성'}</strong>
-                      <small>배정 제외</small>
+                      <small className="text-[0.76rem] text-slate-500">배정 제외</small>
                     </article>
                   )
                 }
@@ -165,13 +193,13 @@ export function ResultPanel({
                 return (
                   <article
                     key={cell.id}
-                    className={`seat-card ${
-                      assignment?.isFixed ? 'seat-card-fixed' : ''
-                    } ${isSearchMatch ? 'seat-card-highlight' : ''}`}
+                    className={`${seatCardClass} ${assignment?.isFixed ? seatCardFixedClass : ''} ${
+                      isSearchMatch ? seatCardHighlightClass : ''
+                    }`}
                   >
-                    <span className="seat-label">{cell.label}</span>
+                    <span className={seatLabelClass}>{cell.label}</span>
                     <strong>{assignment?.participant?.name ?? '빈자리'}</strong>
-                    <small>
+                    <small className="text-[0.76rem] text-slate-500">
                       {seatNumber}번 자리
                       {fixedSeat ? ' · 고정석' : ''}
                     </small>
@@ -182,9 +210,9 @@ export function ResultPanel({
           </div>
         </>
       ) : (
-        <div className="empty-result">
-          <p className="section-kicker">Ready</p>
-          <h3>자리표가 아직 없습니다</h3>
+        <div className={emptyResultClass}>
+          <p className={sectionKickerClass}>Ready</p>
+          <h3 className={emptyTitleClass}>자리표가 아직 없습니다</h3>
           <p>
             왼쪽에서 명단을 입력하고 좌석만 확인한 뒤, <strong>자리 뽑기</strong>를 누르면
             결과가 이 영역에 표시됩니다.

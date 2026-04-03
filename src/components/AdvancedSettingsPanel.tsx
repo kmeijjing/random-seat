@@ -1,4 +1,30 @@
 import type { DrawSettings, FixedSeat, Participant, SeatCell, SeatConfig } from '../types'
+import {
+  accordionButtonClass,
+  advancedPanelClass,
+  buttonRowClass,
+  checkboxRowClass,
+  emptyCopyClass,
+  fieldClass,
+  fieldLabelClass,
+  fieldRowClass,
+  ghostButtonClass,
+  headRowClass,
+  helperTextClass,
+  layoutCellAisleClass,
+  layoutCellBaseClass,
+  layoutCellBlockedClass,
+  layoutCellSeatClass,
+  layoutGridClass,
+  listCardClass,
+  listCardMetaClass,
+  listCardTitleClass,
+  listStackClass,
+  listStackShortClass,
+  optionGroupClass,
+  previewMetaClass,
+  subsectionClass,
+} from './ui'
 
 type AdvancedSettingsPanelProps = {
   isAdvancedOpen: boolean
@@ -48,23 +74,34 @@ export function AdvancedSettingsPanel({
   const sortedFixedSeats = fixedSeats
     .slice()
     .sort((left, right) => left.cellId.localeCompare(right.cellId))
+  const getLayoutCellClass = (type: SeatCell['type']) => {
+    if (type === 'aisle') {
+      return `${layoutCellBaseClass} ${layoutCellAisleClass}`
+    }
+
+    if (type === 'blocked') {
+      return `${layoutCellBaseClass} ${layoutCellBlockedClass}`
+    }
+
+    return `${layoutCellBaseClass} ${layoutCellSeatClass}`
+  }
 
   return (
-    <section className="panel advanced-panel">
-      <button type="button" className="accordion-trigger" onClick={onToggleAdvanced}>
+    <section className={advancedPanelClass}>
+      <button type="button" className={accordionButtonClass} onClick={onToggleAdvanced}>
         <span>고급 설정</span>
         <strong>{isAdvancedOpen ? '접기' : '열기'}</strong>
       </button>
 
       {isAdvancedOpen ? (
-        <div className="advanced-content">
-          <div className="subsection">
-            <div className="subsection-head">
+        <div className="grid gap-2.5">
+          <div className={subsectionClass}>
+            <div className={headRowClass}>
               <strong>배정 옵션</strong>
-              <span>필요할 때만 사용</span>
+              <span className={previewMetaClass}>필요할 때만 사용</span>
             </div>
-            <div className="option-group">
-              <label className="checkbox-row">
+            <div className={optionGroupClass}>
+              <label className={checkboxRowClass}>
                 <input
                   type="checkbox"
                   checked={drawSettings.avoidPreviousSeat}
@@ -72,7 +109,7 @@ export function AdvancedSettingsPanel({
                 />
                 지난 자리 피하기
               </label>
-              <label className="checkbox-row">
+              <label className={checkboxRowClass}>
                 <input
                   type="checkbox"
                   checked={drawSettings.balanceZones}
@@ -83,14 +120,14 @@ export function AdvancedSettingsPanel({
             </div>
           </div>
 
-          <div className="subsection">
-            <div className="subsection-head">
+          <div className={subsectionClass}>
+            <div className={headRowClass}>
               <strong>고정석 지정</strong>
-              <span>{fixedSeats.length}건</span>
+              <span className={previewMetaClass}>{fixedSeats.length}건</span>
             </div>
-            <div className="field-row">
-              <label className="field">
-                <span>학생 선택</span>
+            <div className={fieldRowClass}>
+              <label className={fieldClass}>
+                <span className={fieldLabelClass}>학생 선택</span>
                 <select
                   value={fixedParticipantId}
                   onChange={(event) => onFixedParticipantChange(event.target.value)}
@@ -103,8 +140,8 @@ export function AdvancedSettingsPanel({
                   ))}
                 </select>
               </label>
-              <label className="field">
-                <span>좌석 선택</span>
+              <label className={fieldClass}>
+                <span className={fieldLabelClass}>좌석 선택</span>
                 <select
                   value={fixedCellId}
                   onChange={(event) => onFixedCellChange(event.target.value)}
@@ -119,23 +156,24 @@ export function AdvancedSettingsPanel({
               </label>
             </div>
 
-            <div className="inline-actions">
-              <button type="button" className="ghost-button" onClick={onAddFixedSeat}>
+            <div className={buttonRowClass}>
+              <button type="button" className={ghostButtonClass} onClick={onAddFixedSeat}>
                 고정석 저장
               </button>
             </div>
 
-            <div className="list-stack list-stack-short">
+            <div className={`${listStackClass} ${listStackShortClass}`}>
               {sortedFixedSeats.length > 0 ? (
                 sortedFixedSeats.map((fixedSeat) => (
-                  <article key={fixedSeat.participantId} className="list-card">
+                  <article key={fixedSeat.participantId} className={listCardClass}>
                     <div>
-                      <strong>{fixedSeat.participantName}</strong>
-                      <small>{fixedSeat.cellId} 고정</small>
+                      <strong className={listCardTitleClass}>{fixedSeat.participantName}</strong>
+                      <small className={listCardMetaClass}>{fixedSeat.cellId} 고정</small>
                     </div>
-                    <div className="mini-actions">
+                    <div className={buttonRowClass}>
                       <button
                         type="button"
+                        className={ghostButtonClass}
                         onClick={() => onRemoveFixedSeat(fixedSeat.participantId)}
                       >
                         해제
@@ -144,23 +182,23 @@ export function AdvancedSettingsPanel({
                   </article>
                 ))
               ) : (
-                <p className="empty-copy">지정된 고정석이 없습니다.</p>
+                <p className={emptyCopyClass}>지정된 고정석이 없습니다.</p>
               )}
             </div>
           </div>
 
-          <div className="subsection">
-            <button type="button" className="subsection-toggle" onClick={onToggleSeatEditor}>
+          <div className={subsectionClass}>
+            <button type="button" className={accordionButtonClass} onClick={onToggleSeatEditor}>
               <span>좌석 직접 편집</span>
               <strong>{isSeatEditorOpen ? '접기' : '열기'}</strong>
             </button>
             {isSeatEditorOpen ? (
               <>
-                <p className="helper-text">
+                <p className={helperTextClass}>
                   각 칸을 클릭하면 좌석 → 통로 → 비활성 순으로 바뀝니다.
                 </p>
                 <div
-                  className="layout-grid"
+                  className={layoutGridClass}
                   style={{
                     gridTemplateColumns: `repeat(${seatConfig.columns}, minmax(56px, 1fr))`,
                   }}
@@ -169,11 +207,11 @@ export function AdvancedSettingsPanel({
                     <button
                       key={cell.id}
                       type="button"
-                      className={`layout-cell layout-cell-${cell.type}`}
+                      className={getLayoutCellClass(cell.type)}
                       onClick={() => onCycleCellType(cell.id)}
                     >
-                      <strong>{cell.label}</strong>
-                      <small>
+                      <strong className="text-[0.8rem]">{cell.label}</strong>
+                      <small className="text-[0.72rem] text-slate-500">
                         {cell.type === 'seat'
                           ? '좌석'
                           : cell.type === 'aisle'
@@ -185,20 +223,20 @@ export function AdvancedSettingsPanel({
                 </div>
               </>
             ) : (
-              <p className="helper-text">
+              <p className={helperTextClass}>
                 현재 좌석 {usableSeatCount}석, 통로/비활성은 필요할 때만 편집합니다.
               </p>
             )}
           </div>
 
-          <div className="inline-actions">
-            <button type="button" className="ghost-button" onClick={onClearAllStorage}>
+          <div className={buttonRowClass}>
+            <button type="button" className={ghostButtonClass} onClick={onClearAllStorage}>
               전체 저장 삭제
             </button>
           </div>
         </div>
       ) : (
-        <p className="helper-text">
+        <p className={helperTextClass}>
           통로, 고정석, 자리 편중 옵션은 필요할 때만 펼쳐서 사용하세요.
         </p>
       )}

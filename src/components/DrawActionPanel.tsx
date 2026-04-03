@@ -1,3 +1,19 @@
+import {
+  actionSummaryClass,
+  badgeClass,
+  buttonRowClass,
+  errorTextClass,
+  flowCardClass,
+  headRowClass,
+  helperTextClass,
+  panelTitleClass,
+  primaryButtonWideClass,
+  sectionKickerClass,
+  summaryLabelClass,
+  summaryValueClass,
+  ghostButtonClass,
+} from './ui'
+
 type DrawActionPanelProps = {
   hasAssignments: boolean
   isAdvancedOpen: boolean
@@ -18,44 +34,44 @@ export function DrawActionPanel({
   onResetCurrentDraft,
 }: DrawActionPanelProps) {
   return (
-    <section className="panel flow-card flow-card-action">
-      <div className="flow-card-head">
+    <section className={flowCardClass}>
+      <div className={headRowClass}>
         <div>
-          <p className="section-kicker">3. 실행</p>
-          <h2>자리 뽑기</h2>
+          <p className={sectionKickerClass}>3. 실행</p>
+          <h2 className={panelTitleClass}>자리 뽑기</h2>
         </div>
-        <span className="badge">{hasAssignments ? '결과 있음' : '대기 중'}</span>
+        <span className={badgeClass}>{hasAssignments ? '결과 있음' : '대기 중'}</span>
       </div>
 
-      <div className="action-summary">
+      <div className={actionSummaryClass}>
         <div>
-          <span>현재 상태</span>
-          <strong>
+          <span className={summaryLabelClass}>현재 상태</span>
+          <strong className={summaryValueClass}>
             {hasAssignments
               ? '결과를 확인할 수 있습니다.'
               : '기본 설정만으로 바로 진행 가능합니다.'}
           </strong>
         </div>
         <div>
-          <span>고급 설정</span>
-          <strong>{isAdvancedOpen ? '열림' : '기본 접힘'}</strong>
+          <span className={summaryLabelClass}>고급 설정</span>
+          <strong className={summaryValueClass}>{isAdvancedOpen ? '열림' : '기본 접힘'}</strong>
         </div>
       </div>
 
-      {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
-      {statusMessage ? <p className="helper-text status-text">{statusMessage}</p> : null}
+      {errorMessage ? <p className={errorTextClass}>{errorMessage}</p> : null}
+      {statusMessage ? <p className={helperTextClass}>{statusMessage}</p> : null}
 
       <button
         type="button"
-        className="primary-button primary-button-wide"
+        className={primaryButtonWideClass}
         onClick={onRunDraw}
         disabled={isDrawing}
       >
         {isDrawing ? '자리 뽑는 중...' : '자리 뽑기'}
       </button>
 
-      <div className="inline-actions">
-        <button type="button" className="ghost-button" onClick={onResetCurrentDraft}>
+      <div className={buttonRowClass}>
+        <button type="button" className={ghostButtonClass} onClick={onResetCurrentDraft}>
           현재 초안 초기화
         </button>
       </div>

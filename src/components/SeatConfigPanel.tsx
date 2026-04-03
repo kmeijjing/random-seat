@@ -1,4 +1,20 @@
 import type { SeatConfig, SeatRecommendation } from '../types'
+import {
+  badgeClass,
+  fieldClass,
+  fieldLabelClass,
+  fieldRowClass,
+  flowCardClass,
+  headRowClass,
+  panelTitleClass,
+  recommendationChipClass,
+  recommendationMetaClass,
+  sectionKickerClass,
+  summaryCardClass,
+  summaryLabelClass,
+  summaryValueClass,
+  buttonRowClass,
+} from './ui'
 
 type SeatConfigPanelProps = {
   seatConfig: SeatConfig
@@ -18,18 +34,18 @@ export function SeatConfigPanel({
   onApplyRecommendation,
 }: SeatConfigPanelProps) {
   return (
-    <section className="panel flow-card">
-      <div className="flow-card-head">
+    <section className={flowCardClass}>
+      <div className={headRowClass}>
         <div>
-          <p className="section-kicker">2. 좌석</p>
-          <h2>좌석 설정</h2>
+          <p className={sectionKickerClass}>2. 좌석</p>
+          <h2 className={panelTitleClass}>좌석 설정</h2>
         </div>
-        <span className="badge">{usableSeatCount}석</span>
+        <span className={badgeClass}>{usableSeatCount}석</span>
       </div>
 
-      <div className="field-row">
-        <label className="field">
-          <span>행</span>
+      <div className={fieldRowClass}>
+        <label className={fieldClass}>
+          <span className={fieldLabelClass}>행</span>
           <input
             type="number"
             min="1"
@@ -37,8 +53,8 @@ export function SeatConfigPanel({
             onChange={(event) => onDimensionChange('rows', event.target.value)}
           />
         </label>
-        <label className="field">
-          <span>열</span>
+        <label className={fieldClass}>
+          <span className={fieldLabelClass}>열</span>
           <input
             type="number"
             min="1"
@@ -48,32 +64,32 @@ export function SeatConfigPanel({
         </label>
       </div>
 
-      <div className="recommendations">
+      <div className={buttonRowClass}>
         {recommendedLayouts.map((recommendation) => (
           <button
             key={recommendation.label}
             type="button"
-            className="recommendation-chip"
+            className={recommendationChipClass}
             onClick={() => onApplyRecommendation(recommendation.rows, recommendation.columns)}
           >
             {recommendation.label}
-            <small>{recommendation.emptyCount}칸 여유</small>
+            <small className={recommendationMetaClass}>{recommendation.emptyCount}칸 여유</small>
           </button>
         ))}
       </div>
 
-      <div className="summary-card">
+      <div className={summaryCardClass}>
         <div>
-          <span>사용 가능 좌석</span>
-          <strong>{usableSeatCount}석</strong>
+          <span className={summaryLabelClass}>사용 가능 좌석</span>
+          <strong className={summaryValueClass}>{usableSeatCount}석</strong>
         </div>
         <div>
-          <span>참여자</span>
-          <strong>{participantCount}명</strong>
+          <span className={summaryLabelClass}>참여자</span>
+          <strong className={summaryValueClass}>{participantCount}명</strong>
         </div>
         <div>
-          <span>남는 좌석</span>
-          <strong>{Math.max(usableSeatCount - participantCount, 0)}석</strong>
+          <span className={summaryLabelClass}>남는 좌석</span>
+          <strong className={summaryValueClass}>{Math.max(usableSeatCount - participantCount, 0)}석</strong>
         </div>
       </div>
     </section>

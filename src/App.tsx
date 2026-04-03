@@ -6,6 +6,7 @@ import { DrawActionPanel } from './components/DrawActionPanel'
 import { ParticipantInputPanel } from './components/ParticipantInputPanel'
 import { ResultPanel } from './components/ResultPanel'
 import { SeatConfigPanel } from './components/SeatConfigPanel'
+import { flowRailClass, shellClass, workspaceClass } from './components/ui'
 import type {
   CurrentDraft,
   DrawHistoryEntry,
@@ -591,7 +592,7 @@ function App() {
   }
 
   return (
-    <div className="app-shell min-h-screen antialiased">
+    <div className={shellClass}>
       <AppHeader
         updatedAtLabel={formatTimestamp(updatedAt)}
         participantCount={participants.length}
@@ -602,8 +603,8 @@ function App() {
         onOpenHistoryDrawer={openHistoryDrawer}
       />
 
-      <main className="workspace ux-workspace">
-        <aside className="flow-rail">
+      <main className={workspaceClass}>
+        <aside className={flowRailClass}>
           <ParticipantInputPanel
             participantInput={participantInput}
             participants={participants}
