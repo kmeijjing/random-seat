@@ -2,20 +2,25 @@ import type { Participant } from '../types'
 
 const cellSeparators = /[\t,;]+/
 
-function createParticipantId(name: string, index: number) {
-  return `${name}-${index}`
-}
-
 export function parseParticipants(input: string): Participant[] {
-  return input
+  const names = input
     .split(/\r?\n/)
     .flatMap((line) => line.split(cellSeparators))
     .map((value) => value.trim())
     .filter(Boolean)
-    .map((name, index) => ({
-      id: createParticipantId(name, index),
+
+  const occurrenceCounter = new Map<string, number>()
+
+  return names.map((name) => {
+    const occurrence = (occurrenceCounter.get(name) ?? 0) + 1
+
+    occurrenceCounter.set(name, occurrence)
+
+    return {
+      id: `${name}-${occurrence}`,
       name,
-    }))
+    }
+  })
 }
 
 export function findDuplicateNames(participants: Participant[]): string[] {

@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import {
   actionSummaryClass,
   badgeClass,
@@ -24,7 +25,7 @@ type DrawActionPanelProps = {
   onResetCurrentDraft: () => void
 }
 
-export function DrawActionPanel({
+export const DrawActionPanel = memo(function DrawActionPanel({
   hasAssignments,
   isAdvancedOpen,
   errorMessage,
@@ -77,4 +78,4 @@ export function DrawActionPanel({
       </div>
     </section>
   )
-}
+})

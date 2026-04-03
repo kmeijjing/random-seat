@@ -27,15 +27,15 @@ describe('storage helpers', () => {
         ...getDefaultState().currentDraft,
         participantInput: '김하나\n박둘',
       },
-      searchQuery: '김하나',
-      selectedParticipantsForRedraw: ['김하나-0'],
     }
 
     saveState(state)
 
     expect(window.localStorage.getItem(STORAGE_KEY)).toBeTruthy()
-    expect(loadSavedState().searchQuery).toBe('김하나')
-    expect(loadSavedState().selectedParticipantsForRedraw).toEqual(['김하나-0'])
+
+    const loaded = loadSavedState()
+
+    expect(loaded.currentDraft.participantInput).toBe('김하나\n박둘')
   })
 
   it('clears saved state from localStorage', () => {

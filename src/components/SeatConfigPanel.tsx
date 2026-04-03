@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { SeatConfig, SeatRecommendation } from '../types'
 import {
   badgeClass,
@@ -25,7 +26,7 @@ type SeatConfigPanelProps = {
   onApplyRecommendation: (rows: number, columns: number) => void
 }
 
-export function SeatConfigPanel({
+export const SeatConfigPanel = memo(function SeatConfigPanel({
   seatConfig,
   recommendedLayouts,
   usableSeatCount,
@@ -94,4 +95,4 @@ export function SeatConfigPanel({
       </div>
     </section>
   )
-}
+})

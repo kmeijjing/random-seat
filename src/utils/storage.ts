@@ -46,8 +46,6 @@ const defaultState: SavedState = {
   currentDraft: createDefaultDraft(),
   templates: [],
   history: [],
-  searchQuery: '',
-  selectedParticipantsForRedraw: [],
 }
 
 function normalizeSeatConfig(
@@ -86,11 +84,39 @@ function normalizeLayout(
 }
 
 function normalizeAssignments(assignments?: unknown): SeatAssignment[] {
-  return Array.isArray(assignments) ? (assignments as SeatAssignment[]) : []
+  if (!Array.isArray(assignments)) {
+    return []
+  }
+
+  return assignments.filter((item) => {
+    if (!item || typeof item !== 'object') {
+      return false
+    }
+
+    const typed = item as Partial<SeatAssignment>
+
+    return typeof typed.cellId === 'string' && typeof typed.seatNumber === 'number'
+  }) as SeatAssignment[]
 }
 
 function normalizeFixedSeats(fixedSeats?: unknown): FixedSeat[] {
-  return Array.isArray(fixedSeats) ? (fixedSeats as FixedSeat[]) : []
+  if (!Array.isArray(fixedSeats)) {
+    return []
+  }
+
+  return fixedSeats.filter((item) => {
+    if (!item || typeof item !== 'object') {
+      return false
+    }
+
+    const typed = item as Partial<FixedSeat>
+
+    return (
+      typeof typed.participantId === 'string' &&
+      typeof typed.participantName === 'string' &&
+      typeof typed.cellId === 'string'
+    )
+  }) as FixedSeat[]
 }
 
 function normalizeTemplates(templates?: unknown): SeatTemplate[] {
@@ -114,7 +140,23 @@ function normalizeTemplates(templates?: unknown): SeatTemplate[] {
 }
 
 function normalizeHistory(history?: unknown): DrawHistoryEntry[] {
-  return Array.isArray(history) ? (history as DrawHistoryEntry[]) : []
+  if (!Array.isArray(history)) {
+    return []
+  }
+
+  return history.filter((item) => {
+    if (!item || typeof item !== 'object') {
+      return false
+    }
+
+    const typed = item as Partial<DrawHistoryEntry>
+
+    return (
+      typeof typed.id === 'string' &&
+      typeof typed.timestamp === 'string' &&
+      Array.isArray(typed.assignments)
+    )
+  }) as DrawHistoryEntry[]
 }
 
 function isLegacyState(value: unknown) {
@@ -159,8 +201,6 @@ export function getDefaultState(): SavedState {
     currentDraft: createDefaultDraft(),
     templates: [],
     history: [],
-    searchQuery: '',
-    selectedParticipantsForRedraw: [],
   }
 }
 
@@ -212,10 +252,6 @@ export function loadSavedState(): SavedState {
       },
       templates: normalizeTemplates(parsed.templates),
       history: normalizeHistory(parsed.history),
-      searchQuery: typeof parsed.searchQuery === 'string' ? parsed.searchQuery : '',
-      selectedParticipantsForRedraw: Array.isArray(parsed.selectedParticipantsForRedraw)
-        ? (parsed.selectedParticipantsForRedraw as string[])
-        : [],
     }
   } catch {
     return getDefaultState()

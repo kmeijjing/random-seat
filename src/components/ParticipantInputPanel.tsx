@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { Participant } from '../types'
 import {
   badgeClass,
@@ -24,7 +25,7 @@ type ParticipantInputPanelProps = {
   onParticipantInputChange: (value: string) => void
 }
 
-export function ParticipantInputPanel({
+export const ParticipantInputPanel = memo(function ParticipantInputPanel({
   participantInput,
   participants,
   duplicateNames,
@@ -78,4 +79,4 @@ export function ParticipantInputPanel({
       </div>
     </section>
   )
-}
+})

@@ -8,11 +8,10 @@ import type {
 
 const cellTypeCycle: SeatCellType[] = ['seat', 'aisle', 'blocked']
 
-export function createCellId(row: number, column: number) {
-  return `${row}-${column}`
-}
+const EMPTY_SEAT_WEIGHT = 3
+const RATIO_IMBALANCE_WEIGHT = 1
 
-export function getSeatLabel(row: number, column: number) {
+export function createCellId(row: number, column: number) {
   return `${row}-${column}`
 }
 
@@ -21,11 +20,13 @@ export function createSeatCell(
   column: number,
   type: SeatCellType = 'seat',
 ): SeatCell {
+  const id = createCellId(row, column)
+
   return {
-    id: createCellId(row, column),
+    id,
     row,
     column,
-    label: getSeatLabel(row, column),
+    label: id,
     type,
   }
 }
@@ -144,7 +145,7 @@ export function getRecommendedLayouts(
 
       const emptyCount = seatCount - participantCount
       const ratioPenalty = Math.abs(rows - columns)
-      const score = emptyCount * 3 + ratioPenalty
+      const score = emptyCount * EMPTY_SEAT_WEIGHT + ratioPenalty * RATIO_IMBALANCE_WEIGHT
 
       candidates.push({
         rows,

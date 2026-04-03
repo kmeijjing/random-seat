@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { DrawSettings, FixedSeat, SeatAssignment, SeatConfig } from '../types'
 import {
   badgeClass,
@@ -43,6 +44,8 @@ type ResultPanelProps = {
   isRedrawPickerOpen: boolean
   selectedParticipantsForRedraw: string[]
   onToggleRedrawParticipant: (participantId: string) => void
+  onSelectAllForRedraw: () => void
+  onDeselectAllForRedraw: () => void
   onRunDrawSelected: () => void
   showNoSearchResults: boolean
   seatConfig: SeatConfig
@@ -52,7 +55,7 @@ type ResultPanelProps = {
   seatNumberMap: Map<string, number>
 }
 
-export function ResultPanel({
+export const ResultPanel = memo(function ResultPanel({
   assignments,
   updatedAtLabel,
   drawSettings,
@@ -67,6 +70,8 @@ export function ResultPanel({
   isRedrawPickerOpen,
   selectedParticipantsForRedraw,
   onToggleRedrawParticipant,
+  onSelectAllForRedraw,
+  onDeselectAllForRedraw,
   onRunDrawSelected,
   showNoSearchResults,
   seatConfig,
@@ -138,9 +143,17 @@ export function ResultPanel({
             <div className={`${subsectionClass} print:hidden`}>
               <div className={headRowClass}>
                 <strong>다시 뽑을 학생 선택</strong>
-                <span className="text-[0.76rem] text-slate-500">{selectedParticipantsForRedraw.length}명 선택</span>
+                <div className={buttonRowClass}>
+                  <button type="button" className={ghostButtonClass} onClick={onSelectAllForRedraw}>
+                    전체 선택
+                  </button>
+                  <button type="button" className={ghostButtonClass} onClick={onDeselectAllForRedraw}>
+                    전체 해제
+                  </button>
+                  <span className="text-[0.76rem] text-slate-500">{selectedParticipantsForRedraw.length}명 선택</span>
+                </div>
               </div>
-              <div className={buttonRowClass}>
+              <div className={buttonRowClass} role="group" aria-label="다시 뽑을 학생 목록">
                 {redrawCandidates.map((assignment) => (
                   <label key={assignment.participant!.id} className={checkboxChipClass}>
                     <input
@@ -221,4 +234,4 @@ export function ResultPanel({
       )}
     </section>
   )
-}
+})

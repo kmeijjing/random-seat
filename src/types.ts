@@ -106,6 +106,4 @@ export type SavedState = {
   currentDraft: CurrentDraft
   templates: SeatTemplate[]
   history: DrawHistoryEntry[]
-  searchQuery: string
-  selectedParticipantsForRedraw: string[]
 }

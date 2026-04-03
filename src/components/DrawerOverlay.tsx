@@ -1,4 +1,6 @@
+import { memo, useEffect, useRef } from 'react'
 import type { DrawHistoryEntry, SeatTemplate } from '../types'
+import { formatHistoryOptions, formatTimestamp } from '../utils/format'
 import {
   buttonRowClass,
   drawerBackdropClass,
@@ -29,11 +31,9 @@ type DrawerOverlayProps = {
   onRenameTemplate: (template: SeatTemplate) => void
   onDeleteTemplate: (template: SeatTemplate) => void
   onLoadHistory: (entry: DrawHistoryEntry) => void
-  formatTimestamp: (timestamp: string | null) => string
-  formatHistoryOptions: (options: DrawHistoryEntry['optionsUsed']) => string
 }
 
-export function DrawerOverlay({
+export const DrawerOverlay = memo(function DrawerOverlay({
   isTemplateDrawerOpen,
   isHistoryDrawerOpen,
   templates,
@@ -44,16 +44,42 @@ export function DrawerOverlay({
   onRenameTemplate,
   onDeleteTemplate,
   onLoadHistory,
-  formatTimestamp,
-  formatHistoryOptions,
 }: DrawerOverlayProps) {
+  const panelRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    panelRef.current?.focus()
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [onClose])
+
   if (!isTemplateDrawerOpen && !isHistoryDrawerOpen) {
     return null
   }
 
+  const drawerLabel = isTemplateDrawerOpen ? '저장된 템플릿' : '최근 이력'
+
   return (
     <div className={drawerBackdropClass} onClick={onClose}>
-      <aside className={drawerPanelClass} onClick={(event) => event.stopPropagation()}>
+      <aside
+        ref={panelRef}
+        className={drawerPanelClass}
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={drawerLabel}
+        tabIndex={-1}
+      >
         <div className={headRowClass}>
           <div>
             <p className={sectionKickerClass}>{isTemplateDrawerOpen ? '템플릿' : '이력'}</p>
@@ -131,4 +157,4 @@ export function DrawerOverlay({
       </aside>
     </div>
   )
-}
+})

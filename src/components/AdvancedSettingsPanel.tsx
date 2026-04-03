@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { DrawSettings, FixedSeat, Participant, SeatCell, SeatConfig } from '../types'
 import {
   accordionButtonClass,
@@ -49,7 +50,7 @@ type AdvancedSettingsPanelProps = {
   onClearAllStorage: () => void
 }
 
-export function AdvancedSettingsPanel({
+export const AdvancedSettingsPanel = memo(function AdvancedSettingsPanel({
   isAdvancedOpen,
   onToggleAdvanced,
   drawSettings,
@@ -88,13 +89,13 @@ export function AdvancedSettingsPanel({
 
   return (
     <section className={advancedPanelClass}>
-      <button type="button" className={accordionButtonClass} onClick={onToggleAdvanced}>
+      <button type="button" className={accordionButtonClass} onClick={onToggleAdvanced} aria-expanded={isAdvancedOpen} aria-controls="advanced-settings-content">
         <span>고급 설정</span>
         <strong>{isAdvancedOpen ? '접기' : '열기'}</strong>
       </button>
 
       {isAdvancedOpen ? (
-        <div className="grid gap-2.5">
+        <div id="advanced-settings-content" className="grid gap-2.5">
           <div className={subsectionClass}>
             <div className={headRowClass}>
               <strong>배정 옵션</strong>
@@ -188,12 +189,12 @@ export function AdvancedSettingsPanel({
           </div>
 
           <div className={subsectionClass}>
-            <button type="button" className={accordionButtonClass} onClick={onToggleSeatEditor}>
+            <button type="button" className={accordionButtonClass} onClick={onToggleSeatEditor} aria-expanded={isSeatEditorOpen} aria-controls="seat-editor-content">
               <span>좌석 직접 편집</span>
               <strong>{isSeatEditorOpen ? '접기' : '열기'}</strong>
             </button>
             {isSeatEditorOpen ? (
-              <>
+              <div id="seat-editor-content">
                 <p className={helperTextClass}>
                   각 칸을 클릭하면 좌석 → 통로 → 비활성 순으로 바뀝니다.
                 </p>
@@ -203,25 +204,30 @@ export function AdvancedSettingsPanel({
                     gridTemplateColumns: `repeat(${seatConfig.columns}, minmax(56px, 1fr))`,
                   }}
                 >
-                  {seatConfig.layout.cells.map((cell) => (
-                    <button
-                      key={cell.id}
-                      type="button"
-                      className={getLayoutCellClass(cell.type)}
-                      onClick={() => onCycleCellType(cell.id)}
-                    >
-                      <strong className="text-[0.8rem]">{cell.label}</strong>
-                      <small className="text-[0.72rem] text-slate-500">
-                        {cell.type === 'seat'
-                          ? '좌석'
-                          : cell.type === 'aisle'
-                            ? '통로'
-                            : '비활성'}
-                      </small>
-                    </button>
-                  ))}
+                  {seatConfig.layout.cells.map((cell) => {
+                    const nextType = cell.type === 'seat' ? '통로' : cell.type === 'aisle' ? '비활성' : '좌석'
+
+                    return (
+                      <button
+                        key={cell.id}
+                        type="button"
+                        className={getLayoutCellClass(cell.type)}
+                        onClick={() => onCycleCellType(cell.id)}
+                        aria-label={`${cell.label} ${cell.type === 'seat' ? '좌석' : cell.type === 'aisle' ? '통로' : '비활성'}, 클릭하여 ${nextType}로 변경`}
+                      >
+                        <strong className="text-[0.8rem]">{cell.label}</strong>
+                        <small className="text-[0.72rem] text-slate-500">
+                          {cell.type === 'seat'
+                            ? '좌석'
+                            : cell.type === 'aisle'
+                              ? '통로'
+                              : '비활성'}
+                        </small>
+                      </button>
+                    )
+                  })}
                 </div>
-              </>
+              </div>
             ) : (
               <p className={helperTextClass}>
                 현재 좌석 {usableSeatCount}석, 통로/비활성은 필요할 때만 편집합니다.
@@ -242,4 +248,4 @@ export function AdvancedSettingsPanel({
       )}
     </section>
   )
-}
+})

@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import {
   appHeaderClass,
   ghostButtonClass,
@@ -22,7 +23,7 @@ type AppHeaderProps = {
   onOpenHistoryDrawer: () => void
 }
 
-export function AppHeader({
+export const AppHeader = memo(function AppHeader({
   updatedAtLabel,
   participantCount,
   usableSeatCount,
@@ -62,4 +63,4 @@ export function AppHeader({
       </div>
     </header>
   )
-}
+})
