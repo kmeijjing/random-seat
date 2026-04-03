@@ -1,4 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
+import { AdvancedSettingsPanel } from './components/AdvancedSettingsPanel'
+import { AppHeader } from './components/AppHeader'
+import { DrawerOverlay } from './components/DrawerOverlay'
+import { DrawActionPanel } from './components/DrawActionPanel'
+import { ParticipantInputPanel } from './components/ParticipantInputPanel'
+import { ResultPanel } from './components/ResultPanel'
+import { SeatConfigPanel } from './components/SeatConfigPanel'
 import type {
   CurrentDraft,
   DrawHistoryEntry,
@@ -585,602 +592,114 @@ function App() {
 
   return (
     <div className="app-shell min-h-screen antialiased">
-      <header className="app-header app-header-compact">
-        <div className="title-block">
-          <p className="eyebrow">Local Classroom Seat Tool</p>
-          <h1>랜덤 자리 뽑기</h1>
-          <p className="hero-text">
-            명단 입력, 좌석 확인, 자리 뽑기, 결과 활용까지 한 흐름으로 정리했습니다.
-          </p>
-        </div>
-        <div className="header-summary">
-          <article className="metric-card metric-card-strong">
-            <span>마지막 자리 뽑기</span>
-            <strong>{formatTimestamp(updatedAt)}</strong>
-          </article>
-          <article className="metric-card">
-            <span>참여자 / 사용 가능 좌석</span>
-            <strong>
-              {participants.length} / {usableSeatCount}
-            </strong>
-          </article>
-          <div className="header-actions">
-            <button type="button" className="ghost-button" onClick={openTemplateDrawer}>
-              템플릿 {templates.length}
-            </button>
-            <button type="button" className="ghost-button" onClick={openHistoryDrawer}>
-              이력 {history.length}
-            </button>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        updatedAtLabel={formatTimestamp(updatedAt)}
+        participantCount={participants.length}
+        usableSeatCount={usableSeatCount}
+        templateCount={templates.length}
+        historyCount={history.length}
+        onOpenTemplateDrawer={openTemplateDrawer}
+        onOpenHistoryDrawer={openHistoryDrawer}
+      />
 
       <main className="workspace ux-workspace">
         <aside className="flow-rail">
-          <section className="panel flow-card">
-            <div className="flow-card-head">
-              <div>
-                <p className="section-kicker">1. 명단</p>
-                <h2>명단 입력</h2>
-              </div>
-              <span className="badge">{participants.length}명</span>
-            </div>
-
-            <label className="field">
-              <span>이름 입력 또는 CSV 붙여넣기</span>
-              <textarea
-                value={participantInput}
-                onChange={(event) => handleParticipantInputChange(event.target.value)}
-                placeholder={'예시\n김하나\n박둘\n이셋\n\n또는\n김하나,박둘,이셋'}
-                rows={8}
-              />
-            </label>
-
-            <p className="helper-text">줄바꿈, 쉼표, 탭 입력을 자동 정리합니다.</p>
-
-            {duplicateNames.length > 0 ? (
-              <p className="warning-text">
-                중복 이름 감지: {duplicateNames.join(', ')}
-              </p>
-            ) : null}
-
-            <div className="preview-box compact-box">
-              <div className="preview-head">
-                <strong>파싱 미리보기</strong>
-                <span>{participants.length}명</span>
-              </div>
-              <div className="chip-list chip-list-scroll">
-                {participants.length > 0 ? (
-                  participants.map((participant) => (
-                    <span key={participant.id} className="chip">
-                      {participant.name}
-                    </span>
-                  ))
-                ) : (
-                  <span className="empty-copy">입력된 이름이 아직 없습니다.</span>
-                )}
-              </div>
-            </div>
-          </section>
-
-          <section className="panel flow-card">
-            <div className="flow-card-head">
-              <div>
-                <p className="section-kicker">2. 좌석</p>
-                <h2>좌석 설정</h2>
-              </div>
-              <span className="badge">{usableSeatCount}석</span>
-            </div>
-
-            <div className="field-row">
-              <label className="field">
-                <span>행</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={seatConfig.rows}
-                  onChange={(event) => handleDimensionChange('rows', event.target.value)}
-                />
-              </label>
-              <label className="field">
-                <span>열</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={seatConfig.columns}
-                  onChange={(event) => handleDimensionChange('columns', event.target.value)}
-                />
-              </label>
-            </div>
-
-            <div className="recommendations">
-              {recommendedLayouts.map((recommendation) => (
-                <button
-                  key={recommendation.label}
-                  type="button"
-                  className="recommendation-chip"
-                  onClick={() =>
-                    applyRecommendation(recommendation.rows, recommendation.columns)
-                  }
-                >
-                  {recommendation.label}
-                  <small>{recommendation.emptyCount}칸 여유</small>
-                </button>
-              ))}
-            </div>
-
-            <div className="summary-card">
-              <div>
-                <span>사용 가능 좌석</span>
-                <strong>{usableSeatCount}석</strong>
-              </div>
-              <div>
-                <span>참여자</span>
-                <strong>{participants.length}명</strong>
-              </div>
-              <div>
-                <span>남는 좌석</span>
-                <strong>{Math.max(usableSeatCount - participants.length, 0)}석</strong>
-              </div>
-            </div>
-          </section>
-
-          <section className="panel flow-card flow-card-action">
-            <div className="flow-card-head">
-              <div>
-                <p className="section-kicker">3. 실행</p>
-                <h2>자리 뽑기</h2>
-              </div>
-              <span className="badge">{hasAssignments ? '결과 있음' : '대기 중'}</span>
-            </div>
-
-            <div className="action-summary">
-              <div>
-                <span>현재 상태</span>
-                <strong>{hasAssignments ? '결과를 확인할 수 있습니다.' : '기본 설정만으로 바로 진행 가능합니다.'}</strong>
-              </div>
-              <div>
-                <span>고급 설정</span>
-                <strong>{isAdvancedOpen ? '열림' : '기본 접힘'}</strong>
-              </div>
-            </div>
-
-            {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
-            {statusMessage ? <p className="helper-text status-text">{statusMessage}</p> : null}
-
-            <button
-              type="button"
-              className="primary-button primary-button-wide"
-              onClick={() => runDraw('all')}
-              disabled={isDrawing}
-            >
-              {isDrawing ? '자리 뽑는 중...' : '자리 뽑기'}
-            </button>
-
-            <div className="inline-actions">
-              <button type="button" className="ghost-button" onClick={handleResetCurrentDraft}>
-                현재 초안 초기화
-              </button>
-            </div>
-          </section>
-
-          <section className="panel advanced-panel">
-            <button
-              type="button"
-              className="accordion-trigger"
-              onClick={() => setIsAdvancedOpen((current) => !current)}
-            >
-              <span>고급 설정</span>
-              <strong>{isAdvancedOpen ? '접기' : '열기'}</strong>
-            </button>
-
-            {isAdvancedOpen ? (
-              <div className="advanced-content">
-                <div className="subsection">
-                  <div className="subsection-head">
-                    <strong>배정 옵션</strong>
-                    <span>필요할 때만 사용</span>
-                  </div>
-                  <div className="option-group">
-                    <label className="checkbox-row">
-                      <input
-                        type="checkbox"
-                        checked={drawSettings.avoidPreviousSeat}
-                        onChange={(event) =>
-                          setDrawSettings((current) => ({
-                            ...current,
-                            avoidPreviousSeat: event.target.checked,
-                          }))
-                        }
-                      />
-                      지난 자리 피하기
-                    </label>
-                    <label className="checkbox-row">
-                      <input
-                        type="checkbox"
-                        checked={drawSettings.balanceZones}
-                        onChange={(event) =>
-                          setDrawSettings((current) => ({
-                            ...current,
-                            balanceZones: event.target.checked,
-                          }))
-                        }
-                      />
-                      자리 편중 줄이기
-                    </label>
-                  </div>
-                </div>
-
-                <div className="subsection">
-                  <div className="subsection-head">
-                    <strong>고정석 지정</strong>
-                    <span>{fixedSeats.length}건</span>
-                  </div>
-                  <div className="field-row">
-                    <label className="field">
-                      <span>학생 선택</span>
-                      <select
-                        value={fixedParticipantId}
-                        onChange={(event) => setFixedParticipantId(event.target.value)}
-                      >
-                        <option value="">학생 선택</option>
-                        {participants.map((participant) => (
-                          <option key={participant.id} value={participant.id}>
-                            {participant.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="field">
-                      <span>좌석 선택</span>
-                      <select
-                        value={fixedCellId}
-                        onChange={(event) => setFixedCellId(event.target.value)}
-                      >
-                        <option value="">좌석 선택</option>
-                        {selectableSeatCells.map((cell) => (
-                          <option key={cell.id} value={cell.id}>
-                            {cell.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-
-                  <div className="inline-actions">
-                    <button type="button" className="ghost-button" onClick={handleAddFixedSeat}>
-                      고정석 저장
-                    </button>
-                  </div>
-
-                  <div className="list-stack list-stack-short">
-                    {fixedSeats.length > 0 ? (
-                      fixedSeats
-                        .slice()
-                        .sort((left, right) => left.cellId.localeCompare(right.cellId))
-                        .map((fixedSeat) => (
-                          <article key={fixedSeat.participantId} className="list-card">
-                            <div>
-                              <strong>{fixedSeat.participantName}</strong>
-                              <small>{fixedSeat.cellId} 고정</small>
-                            </div>
-                            <div className="mini-actions">
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveFixedSeat(fixedSeat.participantId)}
-                              >
-                                해제
-                              </button>
-                            </div>
-                          </article>
-                        ))
-                    ) : (
-                      <p className="empty-copy">지정된 고정석이 없습니다.</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="subsection">
-                  <button
-                    type="button"
-                    className="subsection-toggle"
-                    onClick={() => setIsSeatEditorOpen((current) => !current)}
-                  >
-                    <span>좌석 직접 편집</span>
-                    <strong>{isSeatEditorOpen ? '접기' : '열기'}</strong>
-                  </button>
-                  {isSeatEditorOpen ? (
-                    <>
-                      <p className="helper-text">
-                        각 칸을 클릭하면 좌석 → 통로 → 비활성 순으로 바뀝니다.
-                      </p>
-                      <div
-                        className="layout-grid"
-                        style={{
-                          gridTemplateColumns: `repeat(${seatConfig.columns}, minmax(56px, 1fr))`,
-                        }}
-                      >
-                        {seatConfig.layout.cells.map((cell) => (
-                          <button
-                            key={cell.id}
-                            type="button"
-                            className={`layout-cell layout-cell-${cell.type}`}
-                            onClick={() => handleCycleCellType(cell.id)}
-                          >
-                            <strong>{cell.label}</strong>
-                            <small>
-                              {cell.type === 'seat'
-                                ? '좌석'
-                                : cell.type === 'aisle'
-                                  ? '통로'
-                                  : '비활성'}
-                            </small>
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <p className="helper-text">
-                      현재 좌석 {usableSeatCount}석, 통로/비활성은 필요할 때만 편집합니다.
-                    </p>
-                  )}
-                </div>
-
-                <div className="inline-actions">
-                  <button type="button" className="ghost-button" onClick={handleClearAllStorage}>
-                    전체 저장 삭제
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <p className="helper-text">
-                통로, 고정석, 자리 편중 옵션은 필요할 때만 펼쳐서 사용하세요.
-              </p>
-            )}
-          </section>
+          <ParticipantInputPanel
+            participantInput={participantInput}
+            participants={participants}
+            duplicateNames={duplicateNames}
+            onParticipantInputChange={handleParticipantInputChange}
+          />
+          <SeatConfigPanel
+            seatConfig={seatConfig}
+            recommendedLayouts={recommendedLayouts}
+            usableSeatCount={usableSeatCount}
+            participantCount={participants.length}
+            onDimensionChange={handleDimensionChange}
+            onApplyRecommendation={applyRecommendation}
+          />
+          <DrawActionPanel
+            hasAssignments={hasAssignments}
+            isAdvancedOpen={isAdvancedOpen}
+            errorMessage={errorMessage}
+            statusMessage={statusMessage}
+            isDrawing={isDrawing}
+            onRunDraw={() => runDraw('all')}
+            onResetCurrentDraft={handleResetCurrentDraft}
+          />
+          <AdvancedSettingsPanel
+            isAdvancedOpen={isAdvancedOpen}
+            onToggleAdvanced={() => setIsAdvancedOpen((current) => !current)}
+            drawSettings={drawSettings}
+            onAvoidPreviousSeatChange={(checked) =>
+              setDrawSettings((current) => ({
+                ...current,
+                avoidPreviousSeat: checked,
+              }))
+            }
+            onBalanceZonesChange={(checked) =>
+              setDrawSettings((current) => ({
+                ...current,
+                balanceZones: checked,
+              }))
+            }
+            fixedSeats={fixedSeats}
+            fixedParticipantId={fixedParticipantId}
+            fixedCellId={fixedCellId}
+            participants={participants}
+            selectableSeatCells={selectableSeatCells}
+            onFixedParticipantChange={setFixedParticipantId}
+            onFixedCellChange={setFixedCellId}
+            onAddFixedSeat={handleAddFixedSeat}
+            onRemoveFixedSeat={handleRemoveFixedSeat}
+            isSeatEditorOpen={isSeatEditorOpen}
+            onToggleSeatEditor={() => setIsSeatEditorOpen((current) => !current)}
+            seatConfig={seatConfig}
+            usableSeatCount={usableSeatCount}
+            onCycleCellType={handleCycleCellType}
+            onClearAllStorage={handleClearAllStorage}
+          />
         </aside>
 
-        <section className="result-panel result-panel-focus">
-          <div className="panel-head panel-head-result">
-            <div>
-              <p className="section-kicker">결과</p>
-              <h2>자리표</h2>
-            </div>
-            <span className="badge">{hasAssignments ? `${assignments.length}명 배정` : '결과 대기'}</span>
-          </div>
-
-          <div className="result-toolbar result-toolbar-simple">
-            <label className="field search-field">
-              <span>이름 검색</span>
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="학생 이름 입력"
-                disabled={!hasAssignments}
-              />
-            </label>
-
-            <div className="toolbar-actions">
-              <button
-                type="button"
-                className="ghost-button"
-                onClick={handleCopyResult}
-                disabled={!hasAssignments}
-              >
-                복사
-              </button>
-              <button
-                type="button"
-                className="ghost-button"
-                onClick={handlePrint}
-                disabled={!hasAssignments}
-              >
-                인쇄
-              </button>
-            </div>
-          </div>
-
-          {hasAssignments ? (
-            <>
-              <div className="result-meta">
-                <span>마지막 결과: {formatTimestamp(updatedAt)}</span>
-                <span>
-                  {drawSettings.avoidPreviousSeat ? '지난 자리 피하기' : '완전 랜덤'}
-                  {' · '}
-                  {drawSettings.balanceZones ? '자리 편중 줄이기' : '균형 옵션 꺼짐'}
-                </span>
-              </div>
-
-              <div className="redraw-actions">
-                <button
-                  type="button"
-                  className="ghost-button"
-                  onClick={() => runDraw('all')}
-                  disabled={isDrawing}
-                >
-                  전체 다시 뽑기
-                </button>
-                <button
-                  type="button"
-                  className="ghost-button"
-                  onClick={() => setIsRedrawPickerOpen((current) => !current)}
-                  disabled={isDrawing || redrawCandidates.length === 0}
-                >
-                  일부만 다시 뽑기
-                </button>
-              </div>
-
-              {isRedrawPickerOpen ? (
-                <div className="subsection redraw-picker">
-                  <div className="subsection-head">
-                    <strong>다시 뽑을 학생 선택</strong>
-                    <span>{selectedParticipantsForRedraw.length}명 선택</span>
-                  </div>
-                  <div className="checkbox-list">
-                    {redrawCandidates.map((assignment) => (
-                      <label key={assignment.participant!.id} className="checkbox-chip">
-                        <input
-                          type="checkbox"
-                          checked={selectedParticipantsForRedraw.includes(
-                            assignment.participant!.id,
-                          )}
-                          onChange={() => toggleRedrawParticipant(assignment.participant!.id)}
-                        />
-                        {assignment.participant!.name}
-                      </label>
-                    ))}
-                  </div>
-                  <div className="inline-actions">
-                    <button
-                      type="button"
-                      className="primary-button"
-                      onClick={() => runDraw('selected')}
-                      disabled={isDrawing}
-                    >
-                      선택한 학생만 다시 뽑기
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-
-              {normalizedSearchQuery && !hasSearchResults ? (
-                <p className="helper-text">검색 결과가 없습니다.</p>
-              ) : null}
-
-              <div className="seat-board">
-                <div
-                  className={`seat-grid result-seat-grid ${isDrawing ? 'seat-grid-drawing' : ''}`}
-                  style={{
-                    gridTemplateColumns: `repeat(${seatConfig.columns}, minmax(118px, 1fr))`,
-                  }}
-                >
-                  {seatConfig.layout.cells.map((cell) => {
-                    const assignment = assignmentMap.get(cell.id)
-                    const isSearchMatch = matchingCellIds.has(cell.id)
-                    const fixedSeat = fixedSeats.find((item) => item.cellId === cell.id)
-                    const seatNumber = seatNumberMap.get(cell.id)
-
-                    if (cell.type !== 'seat') {
-                      return (
-                        <article key={cell.id} className={`seat-card seat-card-${cell.type}`}>
-                          <span className="seat-label">{cell.label}</span>
-                          <strong>{cell.type === 'aisle' ? '통로' : '비활성'}</strong>
-                          <small>배정 제외</small>
-                        </article>
-                      )
-                    }
-
-                    return (
-                      <article
-                        key={cell.id}
-                        className={`seat-card ${
-                          assignment?.isFixed ? 'seat-card-fixed' : ''
-                        } ${isSearchMatch ? 'seat-card-highlight' : ''}`}
-                      >
-                        <span className="seat-label">{cell.label}</span>
-                        <strong>{assignment?.participant?.name ?? '빈자리'}</strong>
-                        <small>
-                          {seatNumber}번 자리
-                          {fixedSeat ? ' · 고정석' : ''}
-                        </small>
-                      </article>
-                    )
-                  })}
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="empty-result">
-              <p className="section-kicker">Ready</p>
-              <h3>자리표가 아직 없습니다</h3>
-              <p>
-                왼쪽에서 명단을 입력하고 좌석만 확인한 뒤, <strong>자리 뽑기</strong>를
-                누르면 결과가 이 영역에 표시됩니다.
-              </p>
-            </div>
-          )}
-        </section>
+        <ResultPanel
+          assignments={assignments}
+          updatedAtLabel={formatTimestamp(updatedAt)}
+          drawSettings={drawSettings}
+          searchQuery={searchQuery}
+          onSearchQueryChange={setSearchQuery}
+          onCopyResult={handleCopyResult}
+          onPrint={handlePrint}
+          isDrawing={isDrawing}
+          onRunDrawAll={() => runDraw('all')}
+          onToggleRedrawPicker={() => setIsRedrawPickerOpen((current) => !current)}
+          redrawCandidates={redrawCandidates}
+          isRedrawPickerOpen={isRedrawPickerOpen}
+          selectedParticipantsForRedraw={selectedParticipantsForRedraw}
+          onToggleRedrawParticipant={toggleRedrawParticipant}
+          onRunDrawSelected={() => runDraw('selected')}
+          showNoSearchResults={Boolean(normalizedSearchQuery && !hasSearchResults)}
+          seatConfig={seatConfig}
+          assignmentMap={assignmentMap}
+          matchingCellIds={matchingCellIds}
+          fixedSeats={fixedSeats}
+          seatNumberMap={seatNumberMap}
+        />
       </main>
 
-      {(isTemplateDrawerOpen || isHistoryDrawerOpen) ? (
-        <div className="drawer-backdrop" onClick={closeDrawers}>
-          <aside className="drawer-panel" onClick={(event) => event.stopPropagation()}>
-            <div className="drawer-head">
-              <div>
-                <p className="section-kicker">{isTemplateDrawerOpen ? '템플릿' : '이력'}</p>
-                <h2>{isTemplateDrawerOpen ? '저장된 템플릿' : '최근 이력'}</h2>
-              </div>
-              <button type="button" className="ghost-button" onClick={closeDrawers}>
-                닫기
-              </button>
-            </div>
-
-            {isTemplateDrawerOpen ? (
-              <div className="drawer-body">
-                <p className="helper-text">
-                  현재 명단, 좌석 배치, 고정석 상태를 템플릿으로 저장할 수 있습니다.
-                </p>
-                <div className="inline-actions">
-                  <button type="button" className="primary-button" onClick={handleSaveTemplate}>
-                    현재 상태 저장
-                  </button>
-                </div>
-                <div className="list-stack drawer-list">
-                  {templates.length > 0 ? (
-                    templates.map((template) => (
-                      <article key={template.id} className="list-card">
-                        <div>
-                          <strong>{template.name}</strong>
-                          <small>{template.participantInput ? '명단 포함' : '빈 템플릿'}</small>
-                        </div>
-                        <div className="mini-actions">
-                          <button type="button" onClick={() => handleLoadTemplate(template)}>
-                            불러오기
-                          </button>
-                          <button type="button" onClick={() => handleRenameTemplate(template)}>
-                            이름 변경
-                          </button>
-                          <button type="button" onClick={() => handleDeleteTemplate(template)}>
-                            삭제
-                          </button>
-                        </div>
-                      </article>
-                    ))
-                  ) : (
-                    <p className="empty-copy">저장된 템플릿이 없습니다.</p>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="drawer-body">
-                <p className="helper-text">
-                  최근 자리 뽑기 결과를 확인하고 현재 화면으로 다시 불러올 수 있습니다.
-                </p>
-                <div className="list-stack drawer-list">
-                  {history.length > 0 ? (
-                    history.map((entry) => (
-                      <article key={entry.id} className="list-card">
-                        <div>
-                          <strong>{formatTimestamp(entry.timestamp)}</strong>
-                          <small>{formatHistoryOptions(entry.optionsUsed)}</small>
-                        </div>
-                        <div className="mini-actions">
-                          <button type="button" onClick={() => handleLoadHistory(entry)}>
-                            불러오기
-                          </button>
-                        </div>
-                      </article>
-                    ))
-                  ) : (
-                    <p className="empty-copy">저장된 이력이 아직 없습니다.</p>
-                  )}
-                </div>
-              </div>
-            )}
-          </aside>
-        </div>
-      ) : null}
+      <DrawerOverlay
+        isTemplateDrawerOpen={isTemplateDrawerOpen}
+        isHistoryDrawerOpen={isHistoryDrawerOpen}
+        templates={templates}
+        history={history}
+        onClose={closeDrawers}
+        onSaveTemplate={handleSaveTemplate}
+        onLoadTemplate={handleLoadTemplate}
+        onRenameTemplate={handleRenameTemplate}
+        onDeleteTemplate={handleDeleteTemplate}
+        onLoadHistory={handleLoadHistory}
+        formatTimestamp={formatTimestamp}
+        formatHistoryOptions={formatHistoryOptions}
+      />
     </div>
   )
 }
