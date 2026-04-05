@@ -1,7 +1,11 @@
-import { useMemo } from 'react'
-import { useShallow } from 'zustand/react/shallow'
-import { selectParticipants, selectRecommendedLayouts, selectUsableSeatCount } from '../store/seatSelectors'
-import { useSeatStore } from '../store/seatStore'
+import { useMemo } from "react";
+import { useShallow } from "zustand/react/shallow";
+import {
+  selectParticipants,
+  selectRecommendedLayouts,
+  selectUsableSeatCount,
+} from "../store/seatSelectors";
+import { useSeatStore } from "../store/seatStore";
 import {
   badgeClass,
   buttonRowClass,
@@ -10,14 +14,13 @@ import {
   fieldRowClass,
   flowCardClass,
   headRowClass,
-  panelTitleClass,
   recommendationChipClass,
   recommendationMetaClass,
   sectionKickerClass,
   summaryCardClass,
   summaryLabelClass,
   summaryValueClass,
-} from './ui'
+} from "./ui";
 
 export function SeatConfigPanel() {
   const {
@@ -32,18 +35,32 @@ export function SeatConfigPanel() {
       onDimensionChange: s.onDimensionChange,
       onApplyRecommendation: s.onApplyRecommendation,
     })),
-  )
+  );
 
-  const participants = useMemo(() => selectParticipants({ participantInput } as Parameters<typeof selectParticipants>[0]), [participantInput])
-  const usableSeatCount = useMemo(() => selectUsableSeatCount({ seatConfig } as Parameters<typeof selectUsableSeatCount>[0]), [seatConfig])
-  const recommendedLayouts = useMemo(() => selectRecommendedLayouts(participants.length), [participants.length])
+  const participants = useMemo(
+    () =>
+      selectParticipants({ participantInput } as Parameters<
+        typeof selectParticipants
+      >[0]),
+    [participantInput],
+  );
+  const usableSeatCount = useMemo(
+    () =>
+      selectUsableSeatCount({ seatConfig } as Parameters<
+        typeof selectUsableSeatCount
+      >[0]),
+    [seatConfig],
+  );
+  const recommendedLayouts = useMemo(
+    () => selectRecommendedLayouts(participants.length),
+    [participants.length],
+  );
 
   return (
     <section className={flowCardClass}>
       <div className={headRowClass}>
         <div>
-          <p className={sectionKickerClass}>2. 좌석</p>
-          <h2 className={panelTitleClass}>좌석 설정</h2>
+          <p className={sectionKickerClass}>2. 좌석 설정</p>
         </div>
         <span className={badgeClass}>{usableSeatCount}석</span>
       </div>
@@ -55,7 +72,7 @@ export function SeatConfigPanel() {
             type="number"
             min="1"
             value={seatConfig.rows}
-            onChange={(event) => onDimensionChange('rows', event.target.value)}
+            onChange={(event) => onDimensionChange("rows", event.target.value)}
           />
         </label>
         <label className={fieldClass}>
@@ -64,7 +81,9 @@ export function SeatConfigPanel() {
             type="number"
             min="1"
             value={seatConfig.columns}
-            onChange={(event) => onDimensionChange('columns', event.target.value)}
+            onChange={(event) =>
+              onDimensionChange("columns", event.target.value)
+            }
           />
         </label>
       </div>
@@ -75,10 +94,14 @@ export function SeatConfigPanel() {
             key={recommendation.label}
             type="button"
             className={recommendationChipClass}
-            onClick={() => onApplyRecommendation(recommendation.rows, recommendation.columns)}
+            onClick={() =>
+              onApplyRecommendation(recommendation.rows, recommendation.columns)
+            }
           >
             {recommendation.label}
-            <small className={recommendationMetaClass}>{recommendation.emptyCount}칸 여유</small>
+            <small className={recommendationMetaClass}>
+              {recommendation.emptyCount}칸 여유
+            </small>
           </button>
         ))}
       </div>
@@ -94,9 +117,11 @@ export function SeatConfigPanel() {
         </div>
         <div>
           <span className={summaryLabelClass}>남는 좌석</span>
-          <strong className={summaryValueClass}>{Math.max(usableSeatCount - participants.length, 0)}석</strong>
+          <strong className={summaryValueClass}>
+            {Math.max(usableSeatCount - participants.length, 0)}석
+          </strong>
         </div>
       </div>
     </section>
-  )
+  );
 }
