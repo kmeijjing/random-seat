@@ -1,5 +1,8 @@
-import { memo } from 'react'
-import type { DrawSettings, FixedSeat, SeatAssignment, SeatConfig } from '../types'
+import { useMemo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
+import { selectSeatNumberMap } from '../store/seatSelectors'
+import { useSeatStore } from '../store/seatStore'
+import { formatTimestamp } from '../utils/format'
 import {
   badgeClass,
   buttonRowClass,
@@ -29,57 +32,73 @@ import {
   subsectionClass,
 } from './ui'
 
-type ResultPanelProps = {
-  assignments: SeatAssignment[]
-  updatedAtLabel: string
-  drawSettings: DrawSettings
-  searchQuery: string
-  onSearchQueryChange: (value: string) => void
-  onCopyResult: () => void
-  onPrint: () => void
-  isDrawing: boolean
-  onRunDrawAll: () => void
-  onToggleRedrawPicker: () => void
-  redrawCandidates: SeatAssignment[]
-  isRedrawPickerOpen: boolean
-  selectedParticipantsForRedraw: string[]
-  onToggleRedrawParticipant: (participantId: string) => void
-  onSelectAllForRedraw: () => void
-  onDeselectAllForRedraw: () => void
-  onRunDrawSelected: () => void
-  showNoSearchResults: boolean
-  seatConfig: SeatConfig
-  assignmentMap: Map<string, SeatAssignment>
-  matchingCellIds: Set<string>
-  fixedSeats: FixedSeat[]
-  seatNumberMap: Map<string, number>
-}
+export function ResultPanel() {
+  const {
+    assignments,
+    updatedAt,
+    drawSettings,
+    searchQuery,
+    onSearchQueryChange,
+    onCopyResult,
+    onPrint,
+    isDrawing,
+    onRunDraw,
+    onToggleRedrawPicker,
+    isRedrawPickerOpen,
+    selectedParticipantsForRedraw,
+    onToggleRedrawParticipant,
+    onSelectAllForRedraw,
+    onDeselectAllForRedraw,
+    seatConfig,
+    fixedSeats,
+  } = useSeatStore(
+    useShallow((s) => ({
+      assignments: s.assignments,
+      updatedAt: s.updatedAt,
+      drawSettings: s.drawSettings,
+      searchQuery: s.searchQuery,
+      onSearchQueryChange: s.onSearchQueryChange,
+      onCopyResult: s.onCopyResult,
+      onPrint: s.onPrint,
+      isDrawing: s.isDrawing,
+      onRunDraw: s.onRunDraw,
+      onToggleRedrawPicker: s.onToggleRedrawPicker,
+      isRedrawPickerOpen: s.isRedrawPickerOpen,
+      selectedParticipantsForRedraw: s.selectedParticipantsForRedraw,
+      onToggleRedrawParticipant: s.onToggleRedrawParticipant,
+      onSelectAllForRedraw: s.onSelectAllForRedraw,
+      onDeselectAllForRedraw: s.onDeselectAllForRedraw,
+      seatConfig: s.seatConfig,
+      fixedSeats: s.fixedSeats,
+    })),
+  )
 
-export const ResultPanel = memo(function ResultPanel({
-  assignments,
-  updatedAtLabel,
-  drawSettings,
-  searchQuery,
-  onSearchQueryChange,
-  onCopyResult,
-  onPrint,
-  isDrawing,
-  onRunDrawAll,
-  onToggleRedrawPicker,
-  redrawCandidates,
-  isRedrawPickerOpen,
-  selectedParticipantsForRedraw,
-  onToggleRedrawParticipant,
-  onSelectAllForRedraw,
-  onDeselectAllForRedraw,
-  onRunDrawSelected,
-  showNoSearchResults,
-  seatConfig,
-  assignmentMap,
-  matchingCellIds,
-  fixedSeats,
-  seatNumberMap,
-}: ResultPanelProps) {
+  const updatedAtLabel = formatTimestamp(updatedAt)
+  const assignmentMap = useMemo(
+    () => new Map(assignments.map((a) => [a.cellId, a])),
+    [assignments],
+  )
+  const matchingCellIds = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    return new Set(
+      assignments
+        .filter((a) => query ? a.participant?.name.toLowerCase().includes(query) : false)
+        .map((a) => a.cellId),
+    )
+  }, [assignments, searchQuery])
+  const showNoSearchResults = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    return Boolean(query && matchingCellIds.size === 0)
+  }, [searchQuery, matchingCellIds])
+  const redrawCandidates = useMemo(
+    () => assignments.filter((a) => a.participant && !a.isFixed),
+    [assignments],
+  )
+  const seatNumberMap = useMemo(
+    () => selectSeatNumberMap({ seatConfig } as Parameters<typeof selectSeatNumberMap>[0]),
+    [seatConfig],
+  )
+
   const hasAssignments = assignments.length > 0
 
   return (
@@ -126,7 +145,7 @@ export const ResultPanel = memo(function ResultPanel({
           </div>
 
           <div className={`${buttonRowClass} print:hidden`}>
-            <button type="button" className={ghostButtonClass} onClick={onRunDrawAll} disabled={isDrawing}>
+            <button type="button" className={ghostButtonClass} onClick={() => onRunDraw('all')} disabled={isDrawing}>
               전체 다시 뽑기
             </button>
             <button
@@ -169,7 +188,7 @@ export const ResultPanel = memo(function ResultPanel({
                 <button
                   type="button"
                   className={primaryButtonClass}
-                  onClick={onRunDrawSelected}
+                  onClick={() => onRunDraw('selected')}
                   disabled={isDrawing}
                 >
                   선택한 학생만 다시 뽑기
@@ -234,4 +253,4 @@ export const ResultPanel = memo(function ResultPanel({
       )}
     </section>
   )
-})
+}

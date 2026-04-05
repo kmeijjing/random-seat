@@ -1,5 +1,7 @@
-import { memo } from 'react'
-import type { Participant } from '../types'
+import { useMemo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
+import { selectDuplicateNames, selectParticipants } from '../store/seatSelectors'
+import { useSeatStore } from '../store/seatStore'
 import {
   badgeClass,
   chipClass,
@@ -18,19 +20,17 @@ import {
   warningTextClass,
 } from './ui'
 
-type ParticipantInputPanelProps = {
-  participantInput: string
-  participants: Participant[]
-  duplicateNames: string[]
-  onParticipantInputChange: (value: string) => void
-}
+export function ParticipantInputPanel() {
+  const { participantInput, onParticipantInputChange } = useSeatStore(
+    useShallow((s) => ({
+      participantInput: s.participantInput,
+      onParticipantInputChange: s.onParticipantInputChange,
+    })),
+  )
 
-export const ParticipantInputPanel = memo(function ParticipantInputPanel({
-  participantInput,
-  participants,
-  duplicateNames,
-  onParticipantInputChange,
-}: ParticipantInputPanelProps) {
+  const participants = useMemo(() => selectParticipants({ participantInput } as Parameters<typeof selectParticipants>[0]), [participantInput])
+  const duplicateNames = useMemo(() => selectDuplicateNames(participants), [participants])
+
   return (
     <section className={flowCardClass}>
       <div className={headRowClass}>
@@ -79,4 +79,4 @@ export const ParticipantInputPanel = memo(function ParticipantInputPanel({
       </div>
     </section>
   )
-})
+}

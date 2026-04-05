@@ -1,4 +1,8 @@
-import { memo } from 'react'
+import { useMemo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
+import { selectParticipants, selectUsableSeatCount } from '../store/seatSelectors'
+import { useSeatStore } from '../store/seatStore'
+import { formatTimestamp } from '../utils/format'
 import {
   appHeaderClass,
   ghostButtonClass,
@@ -13,25 +17,31 @@ import {
   sectionKickerClass,
 } from './ui'
 
-type AppHeaderProps = {
-  updatedAtLabel: string
-  participantCount: number
-  usableSeatCount: number
-  templateCount: number
-  historyCount: number
-  onOpenTemplateDrawer: () => void
-  onOpenHistoryDrawer: () => void
-}
+export function AppHeader() {
+  const {
+    updatedAt,
+    participantInput,
+    seatConfig,
+    templates,
+    history,
+    onOpenTemplateDrawer,
+    onOpenHistoryDrawer,
+  } = useSeatStore(
+    useShallow((s) => ({
+      updatedAt: s.updatedAt,
+      participantInput: s.participantInput,
+      seatConfig: s.seatConfig,
+      templates: s.templates,
+      history: s.history,
+      onOpenTemplateDrawer: s.onOpenTemplateDrawer,
+      onOpenHistoryDrawer: s.onOpenHistoryDrawer,
+    })),
+  )
 
-export const AppHeader = memo(function AppHeader({
-  updatedAtLabel,
-  participantCount,
-  usableSeatCount,
-  templateCount,
-  historyCount,
-  onOpenTemplateDrawer,
-  onOpenHistoryDrawer,
-}: AppHeaderProps) {
+  const updatedAtLabel = formatTimestamp(updatedAt)
+  const participants = useMemo(() => selectParticipants({ participantInput } as Parameters<typeof selectParticipants>[0]), [participantInput])
+  const usableSeatCount = useMemo(() => selectUsableSeatCount({ seatConfig } as Parameters<typeof selectUsableSeatCount>[0]), [seatConfig])
+
   return (
     <header className={appHeaderClass}>
       <div>
@@ -49,18 +59,18 @@ export const AppHeader = memo(function AppHeader({
         <article className={metricCardClass}>
           <span className={metricLabelClass}>참여자 / 사용 가능 좌석</span>
           <strong className={metricValueClass}>
-            {participantCount} / {usableSeatCount}
+            {participants.length} / {usableSeatCount}
           </strong>
         </article>
         <div className={headerActionsClass}>
           <button type="button" className={ghostButtonClass} onClick={onOpenTemplateDrawer}>
-            템플릿 {templateCount}
+            템플릿 {templates.length}
           </button>
           <button type="button" className={ghostButtonClass} onClick={onOpenHistoryDrawer}>
-            이력 {historyCount}
+            이력 {history.length}
           </button>
         </div>
       </div>
     </header>
   )
-})
+}

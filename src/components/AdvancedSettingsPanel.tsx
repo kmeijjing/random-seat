@@ -1,5 +1,8 @@
-import { memo } from 'react'
-import type { DrawSettings, FixedSeat, Participant, SeatCell, SeatConfig } from '../types'
+import { useMemo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
+import type { SeatCell } from '../types'
+import { selectParticipants, selectSelectableSeatCells, selectUsableSeatCount } from '../store/seatSelectors'
+import { useSeatStore } from '../store/seatStore'
 import {
   accordionButtonClass,
   advancedPanelClass,
@@ -27,63 +30,64 @@ import {
   subsectionClass,
 } from './ui'
 
-type AdvancedSettingsPanelProps = {
-  isAdvancedOpen: boolean
-  onToggleAdvanced: () => void
-  drawSettings: DrawSettings
-  onAvoidPreviousSeatChange: (checked: boolean) => void
-  onBalanceZonesChange: (checked: boolean) => void
-  fixedSeats: FixedSeat[]
-  fixedParticipantId: string
-  fixedCellId: string
-  participants: Participant[]
-  selectableSeatCells: SeatCell[]
-  onFixedParticipantChange: (value: string) => void
-  onFixedCellChange: (value: string) => void
-  onAddFixedSeat: () => void
-  onRemoveFixedSeat: (participantId: string) => void
-  isSeatEditorOpen: boolean
-  onToggleSeatEditor: () => void
-  seatConfig: SeatConfig
-  usableSeatCount: number
-  onCycleCellType: (cellId: string) => void
-  onClearAllStorage: () => void
-}
+export function AdvancedSettingsPanel() {
+  const {
+    isAdvancedOpen,
+    onToggleAdvanced,
+    drawSettings,
+    onAvoidPreviousSeatChange,
+    onBalanceZonesChange,
+    fixedSeats,
+    fixedParticipantId,
+    fixedCellId,
+    participantInput,
+    seatConfig,
+    onFixedParticipantChange,
+    onFixedCellChange,
+    onAddFixedSeat,
+    onRemoveFixedSeat,
+    isSeatEditorOpen,
+    onToggleSeatEditor,
+    onCycleCellType,
+    onClearAllStorage,
+  } = useSeatStore(
+    useShallow((s) => ({
+      isAdvancedOpen: s.isAdvancedOpen,
+      onToggleAdvanced: s.onToggleAdvanced,
+      drawSettings: s.drawSettings,
+      onAvoidPreviousSeatChange: s.onAvoidPreviousSeatChange,
+      onBalanceZonesChange: s.onBalanceZonesChange,
+      fixedSeats: s.fixedSeats,
+      fixedParticipantId: s.fixedParticipantId,
+      fixedCellId: s.fixedCellId,
+      participantInput: s.participantInput,
+      seatConfig: s.seatConfig,
+      onFixedParticipantChange: s.onFixedParticipantChange,
+      onFixedCellChange: s.onFixedCellChange,
+      onAddFixedSeat: s.onAddFixedSeat,
+      onRemoveFixedSeat: s.onRemoveFixedSeat,
+      isSeatEditorOpen: s.isSeatEditorOpen,
+      onToggleSeatEditor: s.onToggleSeatEditor,
+      onCycleCellType: s.onCycleCellType,
+      onClearAllStorage: s.onClearAllStorage,
+    })),
+  )
 
-export const AdvancedSettingsPanel = memo(function AdvancedSettingsPanel({
-  isAdvancedOpen,
-  onToggleAdvanced,
-  drawSettings,
-  onAvoidPreviousSeatChange,
-  onBalanceZonesChange,
-  fixedSeats,
-  fixedParticipantId,
-  fixedCellId,
-  participants,
-  selectableSeatCells,
-  onFixedParticipantChange,
-  onFixedCellChange,
-  onAddFixedSeat,
-  onRemoveFixedSeat,
-  isSeatEditorOpen,
-  onToggleSeatEditor,
-  seatConfig,
-  usableSeatCount,
-  onCycleCellType,
-  onClearAllStorage,
-}: AdvancedSettingsPanelProps) {
+  const participants = useMemo(() => selectParticipants({ participantInput } as Parameters<typeof selectParticipants>[0]), [participantInput])
+  const selectableSeatCells = useMemo(() => selectSelectableSeatCells({ seatConfig } as Parameters<typeof selectSelectableSeatCells>[0]), [seatConfig])
+  const usableSeatCount = useMemo(() => selectUsableSeatCount({ seatConfig } as Parameters<typeof selectUsableSeatCount>[0]), [seatConfig])
+
   const sortedFixedSeats = fixedSeats
     .slice()
     .sort((left, right) => left.cellId.localeCompare(right.cellId))
+
   const getLayoutCellClass = (type: SeatCell['type']) => {
     if (type === 'aisle') {
       return `${layoutCellBaseClass} ${layoutCellAisleClass}`
     }
-
     if (type === 'blocked') {
       return `${layoutCellBaseClass} ${layoutCellBlockedClass}`
     }
-
     return `${layoutCellBaseClass} ${layoutCellSeatClass}`
   }
 
@@ -248,4 +252,4 @@ export const AdvancedSettingsPanel = memo(function AdvancedSettingsPanel({
       )}
     </section>
   )
-})
+}

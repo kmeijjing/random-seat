@@ -1,5 +1,6 @@
-import { memo, useEffect, useRef } from 'react'
-import type { DrawHistoryEntry, SeatTemplate } from '../types'
+import { useCallback, useEffect, useRef } from 'react'
+import { useShallow } from 'zustand/react/shallow'
+import { useSeatStore } from '../store/seatStore'
 import { formatHistoryOptions, formatTimestamp } from '../utils/format'
 import {
   buttonRowClass,
@@ -20,48 +21,51 @@ import {
   sectionKickerClass,
 } from './ui'
 
-type DrawerOverlayProps = {
-  isTemplateDrawerOpen: boolean
-  isHistoryDrawerOpen: boolean
-  templates: SeatTemplate[]
-  history: DrawHistoryEntry[]
-  onClose: () => void
-  onSaveTemplate: () => void
-  onLoadTemplate: (template: SeatTemplate) => void
-  onRenameTemplate: (template: SeatTemplate) => void
-  onDeleteTemplate: (template: SeatTemplate) => void
-  onLoadHistory: (entry: DrawHistoryEntry) => void
-}
+export function DrawerOverlay() {
+  const {
+    isTemplateDrawerOpen,
+    isHistoryDrawerOpen,
+    templates,
+    history,
+    onCloseDrawers,
+    onSaveTemplate,
+    onLoadTemplate,
+    onRenameTemplate,
+    onDeleteTemplate,
+    onLoadHistory,
+  } = useSeatStore(
+    useShallow((s) => ({
+      isTemplateDrawerOpen: s.isTemplateDrawerOpen,
+      isHistoryDrawerOpen: s.isHistoryDrawerOpen,
+      templates: s.templates,
+      history: s.history,
+      onCloseDrawers: s.onCloseDrawers,
+      onSaveTemplate: s.onSaveTemplate,
+      onLoadTemplate: s.onLoadTemplate,
+      onRenameTemplate: s.onRenameTemplate,
+      onDeleteTemplate: s.onDeleteTemplate,
+      onLoadHistory: s.onLoadHistory,
+    })),
+  )
 
-export const DrawerOverlay = memo(function DrawerOverlay({
-  isTemplateDrawerOpen,
-  isHistoryDrawerOpen,
-  templates,
-  history,
-  onClose,
-  onSaveTemplate,
-  onLoadTemplate,
-  onRenameTemplate,
-  onDeleteTemplate,
-  onLoadHistory,
-}: DrawerOverlayProps) {
   const panelRef = useRef<HTMLElement>(null)
+
+  const handleClose = useCallback(() => onCloseDrawers(), [onCloseDrawers])
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        onClose()
+        handleClose()
       }
     }
 
     document.addEventListener('keydown', handleKeyDown)
-
     panelRef.current?.focus()
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [onClose])
+  }, [handleClose])
 
   if (!isTemplateDrawerOpen && !isHistoryDrawerOpen) {
     return null
@@ -70,7 +74,7 @@ export const DrawerOverlay = memo(function DrawerOverlay({
   const drawerLabel = isTemplateDrawerOpen ? '저장된 템플릿' : '최근 이력'
 
   return (
-    <div className={drawerBackdropClass} onClick={onClose}>
+    <div className={drawerBackdropClass} onClick={handleClose}>
       <aside
         ref={panelRef}
         className={drawerPanelClass}
@@ -85,7 +89,7 @@ export const DrawerOverlay = memo(function DrawerOverlay({
             <p className={sectionKickerClass}>{isTemplateDrawerOpen ? '템플릿' : '이력'}</p>
             <h2 className={panelTitleClass}>{isTemplateDrawerOpen ? '저장된 템플릿' : '최근 이력'}</h2>
           </div>
-          <button type="button" className={ghostButtonClass} onClick={onClose}>
+          <button type="button" className={ghostButtonClass} onClick={handleClose}>
             닫기
           </button>
         </div>
@@ -157,4 +161,4 @@ export const DrawerOverlay = memo(function DrawerOverlay({
       </aside>
     </div>
   )
-})
+}

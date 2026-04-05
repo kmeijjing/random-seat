@@ -1,10 +1,12 @@
-import { memo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
+import { useSeatStore } from '../store/seatStore'
 import {
   actionSummaryClass,
   badgeClass,
   buttonRowClass,
   errorTextClass,
   flowCardClass,
+  ghostButtonClass,
   headRowClass,
   helperTextClass,
   panelTitleClass,
@@ -12,28 +14,31 @@ import {
   sectionKickerClass,
   summaryLabelClass,
   summaryValueClass,
-  ghostButtonClass,
 } from './ui'
 
-type DrawActionPanelProps = {
-  hasAssignments: boolean
-  isAdvancedOpen: boolean
-  errorMessage: string
-  statusMessage: string
-  isDrawing: boolean
-  onRunDraw: () => void
-  onResetCurrentDraft: () => void
-}
+export function DrawActionPanel() {
+  const {
+    assignments,
+    isAdvancedOpen,
+    errorMessage,
+    statusMessage,
+    isDrawing,
+    onRunDraw,
+    onResetCurrentDraft,
+  } = useSeatStore(
+    useShallow((s) => ({
+      assignments: s.assignments,
+      isAdvancedOpen: s.isAdvancedOpen,
+      errorMessage: s.errorMessage,
+      statusMessage: s.statusMessage,
+      isDrawing: s.isDrawing,
+      onRunDraw: s.onRunDraw,
+      onResetCurrentDraft: s.onResetCurrentDraft,
+    })),
+  )
 
-export const DrawActionPanel = memo(function DrawActionPanel({
-  hasAssignments,
-  isAdvancedOpen,
-  errorMessage,
-  statusMessage,
-  isDrawing,
-  onRunDraw,
-  onResetCurrentDraft,
-}: DrawActionPanelProps) {
+  const hasAssignments = assignments.length > 0
+
   return (
     <section className={flowCardClass}>
       <div className={headRowClass}>
@@ -65,7 +70,7 @@ export const DrawActionPanel = memo(function DrawActionPanel({
       <button
         type="button"
         className={primaryButtonWideClass}
-        onClick={onRunDraw}
+        onClick={() => onRunDraw('all')}
         disabled={isDrawing}
       >
         {isDrawing ? '자리 뽑는 중...' : '자리 뽑기'}
@@ -78,4 +83,4 @@ export const DrawActionPanel = memo(function DrawActionPanel({
       </div>
     </section>
   )
-})
+}

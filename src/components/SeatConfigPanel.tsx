@@ -1,7 +1,10 @@
-import { memo } from 'react'
-import type { SeatConfig, SeatRecommendation } from '../types'
+import { useMemo } from 'react'
+import { useShallow } from 'zustand/react/shallow'
+import { selectParticipants, selectRecommendedLayouts, selectUsableSeatCount } from '../store/seatSelectors'
+import { useSeatStore } from '../store/seatStore'
 import {
   badgeClass,
+  buttonRowClass,
   fieldClass,
   fieldLabelClass,
   fieldRowClass,
@@ -14,26 +17,27 @@ import {
   summaryCardClass,
   summaryLabelClass,
   summaryValueClass,
-  buttonRowClass,
 } from './ui'
 
-type SeatConfigPanelProps = {
-  seatConfig: SeatConfig
-  recommendedLayouts: SeatRecommendation[]
-  usableSeatCount: number
-  participantCount: number
-  onDimensionChange: (field: 'rows' | 'columns', value: string) => void
-  onApplyRecommendation: (rows: number, columns: number) => void
-}
+export function SeatConfigPanel() {
+  const {
+    seatConfig,
+    participantInput,
+    onDimensionChange,
+    onApplyRecommendation,
+  } = useSeatStore(
+    useShallow((s) => ({
+      seatConfig: s.seatConfig,
+      participantInput: s.participantInput,
+      onDimensionChange: s.onDimensionChange,
+      onApplyRecommendation: s.onApplyRecommendation,
+    })),
+  )
 
-export const SeatConfigPanel = memo(function SeatConfigPanel({
-  seatConfig,
-  recommendedLayouts,
-  usableSeatCount,
-  participantCount,
-  onDimensionChange,
-  onApplyRecommendation,
-}: SeatConfigPanelProps) {
+  const participants = useMemo(() => selectParticipants({ participantInput } as Parameters<typeof selectParticipants>[0]), [participantInput])
+  const usableSeatCount = useMemo(() => selectUsableSeatCount({ seatConfig } as Parameters<typeof selectUsableSeatCount>[0]), [seatConfig])
+  const recommendedLayouts = useMemo(() => selectRecommendedLayouts(participants.length), [participants.length])
+
   return (
     <section className={flowCardClass}>
       <div className={headRowClass}>
@@ -86,13 +90,13 @@ export const SeatConfigPanel = memo(function SeatConfigPanel({
         </div>
         <div>
           <span className={summaryLabelClass}>참여자</span>
-          <strong className={summaryValueClass}>{participantCount}명</strong>
+          <strong className={summaryValueClass}>{participants.length}명</strong>
         </div>
         <div>
           <span className={summaryLabelClass}>남는 좌석</span>
-          <strong className={summaryValueClass}>{Math.max(usableSeatCount - participantCount, 0)}석</strong>
+          <strong className={summaryValueClass}>{Math.max(usableSeatCount - participants.length, 0)}석</strong>
         </div>
       </div>
     </section>
   )
-})
+}
