@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { AdvancedSettingsPanel } from './components/AdvancedSettingsPanel'
 import { AppHeader } from './components/AppHeader'
 import { DrawerOverlay } from './components/DrawerOverlay'
 import { DrawActionPanel } from './components/DrawActionPanel'
@@ -23,7 +22,6 @@ function App() {
           <ParticipantInputPanel />
           <SeatConfigPanel />
           <DrawActionPanel />
-          <AdvancedSettingsPanel />
         </aside>
 
         <ResultPanel />

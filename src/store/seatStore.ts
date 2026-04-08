@@ -49,6 +49,7 @@ export type SeatStoreState = {
   fixedCellId: string
   isTemplateDrawerOpen: boolean
   isHistoryDrawerOpen: boolean
+  isSettingsDrawerOpen: boolean
   isAdvancedOpen: boolean
   isSeatEditorOpen: boolean
   isRedrawPickerOpen: boolean
@@ -85,6 +86,7 @@ export type SeatStoreActions = {
   onLoadHistory: (entry: DrawHistoryEntry) => void
   onOpenTemplateDrawer: () => void
   onOpenHistoryDrawer: () => void
+  onOpenSettingsDrawer: () => void
   onCloseDrawers: () => void
   _clearDrawTimer: () => void
 }
@@ -137,6 +139,7 @@ function loadInitialState(): SeatStoreState {
     fixedCellId: '',
     isTemplateDrawerOpen: false,
     isHistoryDrawerOpen: false,
+    isSettingsDrawerOpen: false,
     isAdvancedOpen: false,
     isSeatEditorOpen: false,
     isRedrawPickerOpen: false,
@@ -576,13 +579,16 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
         },
 
         onOpenTemplateDrawer: () =>
-          set({ isTemplateDrawerOpen: true, isHistoryDrawerOpen: false }),
+          set({ isTemplateDrawerOpen: true, isHistoryDrawerOpen: false, isSettingsDrawerOpen: false }),
 
         onOpenHistoryDrawer: () =>
-          set({ isHistoryDrawerOpen: true, isTemplateDrawerOpen: false }),
+          set({ isHistoryDrawerOpen: true, isTemplateDrawerOpen: false, isSettingsDrawerOpen: false }),
+
+        onOpenSettingsDrawer: () =>
+          set({ isSettingsDrawerOpen: true, isTemplateDrawerOpen: false, isHistoryDrawerOpen: false }),
 
         onCloseDrawers: () =>
-          set({ isTemplateDrawerOpen: false, isHistoryDrawerOpen: false }),
+          set({ isTemplateDrawerOpen: false, isHistoryDrawerOpen: false, isSettingsDrawerOpen: false }),
 
         _clearDrawTimer: () => clearDrawTimer(),
       }

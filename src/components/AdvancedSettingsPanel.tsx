@@ -5,7 +5,6 @@ import { selectParticipants, selectSelectableSeatCells, selectUsableSeatCount } 
 import { useSeatStore } from '../store/seatStore'
 import {
   accordionButtonClass,
-  advancedPanelClass,
   buttonRowClass,
   checkboxRowClass,
   emptyCopyClass,
@@ -30,10 +29,8 @@ import {
   subsectionClass,
 } from './ui'
 
-export function AdvancedSettingsPanel() {
+export function AdvancedSettingsContent() {
   const {
-    isAdvancedOpen,
-    onToggleAdvanced,
     drawSettings,
     onAvoidPreviousSeatChange,
     onBalanceZonesChange,
@@ -52,8 +49,6 @@ export function AdvancedSettingsPanel() {
     onClearAllStorage,
   } = useSeatStore(
     useShallow((s) => ({
-      isAdvancedOpen: s.isAdvancedOpen,
-      onToggleAdvanced: s.onToggleAdvanced,
       drawSettings: s.drawSettings,
       onAvoidPreviousSeatChange: s.onAvoidPreviousSeatChange,
       onBalanceZonesChange: s.onBalanceZonesChange,
@@ -92,14 +87,7 @@ export function AdvancedSettingsPanel() {
   }
 
   return (
-    <section className={advancedPanelClass}>
-      <button type="button" className={accordionButtonClass} onClick={onToggleAdvanced} aria-expanded={isAdvancedOpen} aria-controls="advanced-settings-content">
-        <span>고급 설정</span>
-        <strong>{isAdvancedOpen ? '접기' : '열기'}</strong>
-      </button>
-
-      {isAdvancedOpen ? (
-        <div id="advanced-settings-content" className="grid gap-2.5">
+    <div className="grid gap-2.5">
           <div className={subsectionClass}>
             <div className={headRowClass}>
               <strong>배정 옵션</strong>
@@ -244,12 +232,6 @@ export function AdvancedSettingsPanel() {
               전체 저장 삭제
             </button>
           </div>
-        </div>
-      ) : (
-        <p className={helperTextClass}>
-          통로, 고정석, 자리 편중 옵션은 필요할 때만 펼쳐서 사용하세요.
-        </p>
-      )}
-    </section>
+    </div>
   )
 }

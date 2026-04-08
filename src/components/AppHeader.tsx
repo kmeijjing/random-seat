@@ -1,80 +1,36 @@
-import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
-import {
-  selectParticipants,
-  selectUsableSeatCount,
-} from "../store/seatSelectors";
+
 import { useSeatStore } from "../store/seatStore";
-import { formatTimestamp } from "../utils/format";
 import {
   appHeaderClass,
   ghostButtonClass,
   headerActionsClass,
   headerSummaryClass,
   heroTitleClass,
-  metricCardClass,
-  metricCardStrongClass,
-  metricLabelClass,
-  metricValueClass,
 } from "./ui";
+import { IoSettingsOutline } from "react-icons/io5";
 
 export function AppHeader() {
-  const {
-    updatedAt,
-    participantInput,
-    seatConfig,
-    templates,
-    history,
-    onOpenTemplateDrawer,
-    onOpenHistoryDrawer,
-  } = useSeatStore(
-    useShallow((s) => ({
-      updatedAt: s.updatedAt,
-      participantInput: s.participantInput,
-      seatConfig: s.seatConfig,
-      templates: s.templates,
-      history: s.history,
-      onOpenTemplateDrawer: s.onOpenTemplateDrawer,
-      onOpenHistoryDrawer: s.onOpenHistoryDrawer,
-    })),
-  );
-
-  const updatedAtLabel = formatTimestamp(updatedAt);
-  const participants = useMemo(
-    () =>
-      selectParticipants({ participantInput } as Parameters<
-        typeof selectParticipants
-      >[0]),
-    [participantInput],
-  );
-  const usableSeatCount = useMemo(
-    () =>
-      selectUsableSeatCount({ seatConfig } as Parameters<
-        typeof selectUsableSeatCount
-      >[0]),
-    [seatConfig],
-  );
+  const { templates, history, onOpenTemplateDrawer, onOpenHistoryDrawer, onOpenSettingsDrawer } =
+    useSeatStore(
+      useShallow((s) => ({
+        updatedAt: s.updatedAt,
+        participantInput: s.participantInput,
+        seatConfig: s.seatConfig,
+        templates: s.templates,
+        history: s.history,
+        onOpenTemplateDrawer: s.onOpenTemplateDrawer,
+        onOpenHistoryDrawer: s.onOpenHistoryDrawer,
+        onOpenSettingsDrawer: s.onOpenSettingsDrawer,
+      })),
+    );
 
   return (
     <header className={appHeaderClass}>
       <div>
-        <h1 className={heroTitleClass}>랜덤 자리 뽑기</h1>
+        <h1 className={heroTitleClass}>Random Seat</h1>
       </div>
       <div className={headerSummaryClass}>
-        <article className={`${metricCardClass} ${metricCardStrongClass}`}>
-          <span className="text-[0.74rem] text-inherit/80">
-            마지막 자리 뽑기
-          </span>
-          <strong className={`${metricValueClass} text-inherit`}>
-            {updatedAtLabel}
-          </strong>
-        </article>
-        <article className={metricCardClass}>
-          <span className={metricLabelClass}>참여자 / 사용 가능 좌석</span>
-          <strong className={metricValueClass}>
-            {participants.length} / {usableSeatCount}
-          </strong>
-        </article>
         <div className={headerActionsClass}>
           <button
             type="button"
@@ -89,6 +45,9 @@ export function AppHeader() {
             onClick={onOpenHistoryDrawer}
           >
             이력 {history.length}
+          </button>
+          <button type="button" className={ghostButtonClass} onClick={onOpenSettingsDrawer}>
+            <IoSettingsOutline />
           </button>
         </div>
       </div>

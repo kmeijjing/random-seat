@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { useSeatStore } from '../store/seatStore'
 import { formatHistoryOptions, formatTimestamp } from '../utils/format'
+import { AdvancedSettingsContent } from './AdvancedSettingsPanel'
 import {
   buttonRowClass,
   drawerBackdropClass,
@@ -25,6 +26,7 @@ export function DrawerOverlay() {
   const {
     isTemplateDrawerOpen,
     isHistoryDrawerOpen,
+    isSettingsDrawerOpen,
     templates,
     history,
     onCloseDrawers,
@@ -37,6 +39,7 @@ export function DrawerOverlay() {
     useShallow((s) => ({
       isTemplateDrawerOpen: s.isTemplateDrawerOpen,
       isHistoryDrawerOpen: s.isHistoryDrawerOpen,
+      isSettingsDrawerOpen: s.isSettingsDrawerOpen,
       templates: s.templates,
       history: s.history,
       onCloseDrawers: s.onCloseDrawers,
@@ -67,11 +70,11 @@ export function DrawerOverlay() {
     }
   }, [handleClose])
 
-  if (!isTemplateDrawerOpen && !isHistoryDrawerOpen) {
+  if (!isTemplateDrawerOpen && !isHistoryDrawerOpen && !isSettingsDrawerOpen) {
     return null
   }
 
-  const drawerLabel = isTemplateDrawerOpen ? '저장된 템플릿' : '최근 이력'
+  const drawerLabel = isSettingsDrawerOpen ? '고급 설정' : isTemplateDrawerOpen ? '저장된 템플릿' : '최근 이력'
 
   return (
     <div className={drawerBackdropClass} onClick={handleClose}>
@@ -86,15 +89,19 @@ export function DrawerOverlay() {
       >
         <div className={headRowClass}>
           <div>
-            <p className={sectionKickerClass}>{isTemplateDrawerOpen ? '템플릿' : '이력'}</p>
-            <h2 className={panelTitleClass}>{isTemplateDrawerOpen ? '저장된 템플릿' : '최근 이력'}</h2>
+            <p className={sectionKickerClass}>{isSettingsDrawerOpen ? '설정' : isTemplateDrawerOpen ? '템플릿' : '이력'}</p>
+            <h2 className={panelTitleClass}>{drawerLabel}</h2>
           </div>
           <button type="button" className={ghostButtonClass} onClick={handleClose}>
             닫기
           </button>
         </div>
 
-        {isTemplateDrawerOpen ? (
+        {isSettingsDrawerOpen ? (
+          <div className={drawerBodyClass}>
+            <AdvancedSettingsContent />
+          </div>
+        ) : isTemplateDrawerOpen ? (
           <div className={drawerBodyClass}>
             <p className={helperTextClass}>
               현재 명단, 좌석 배치, 고정석 상태를 템플릿으로 저장할 수 있습니다.

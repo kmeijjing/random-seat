@@ -1,10 +1,10 @@
 export const shellClass =
-  "mx-auto grid min-h-screen w-[min(1520px,calc(100%-28px))] grid-rows-[auto_1fr] gap-2.5 py-2.5 antialiased max-[900px]:w-[min(calc(100%-20px),1520px)] print:block print:min-h-auto print:w-full print:bg-white print:p-0";
+  "mx-auto grid min-h-screen w-[min(1520px,calc(100%-28px))] grid-rows-[auto_1fr] gap-2.5 pt-[62px] pb-2.5 antialiased max-[900px]:w-[min(calc(100%-20px),1520px)] max-[900px]:pt-[180px] print:block print:min-h-auto print:w-full print:bg-white print:p-0 print:pt-0";
 
 export const glassPanelClass =
   "min-h-0 rounded-[22px] border border-slate-900/8 bg-white/86 p-3.5 shadow-[0_18px_42px_rgba(15,23,42,0.08)] backdrop-blur-[16px]";
 
-export const appHeaderClass = `${glassPanelClass} grid grid-cols-[minmax(0,1.3fr)_minmax(360px,520px)] gap-3 items-start max-[900px]:grid-cols-1 print:hidden`;
+export const appHeaderClass = `bg-white/30 backdrop-blur-[4px] py-3 px-8 fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full flex flex-nowrap items-center justify-between print:hidden`;
 
 export const workspaceClass =
   "grid min-h-0 gap-2.5 grid-cols-[minmax(360px,430px)_minmax(0,1fr)] max-[1280px]:grid-cols-1 print:block print:min-h-auto print:w-full print:gap-0";
@@ -20,7 +20,7 @@ export const drawerPanelClass =
 export const sectionKickerClass =
   "mb-1 text-[0.8rem] font-extrabold uppercase tracking-[0.08em] text-amber-700";
 export const heroTitleClass =
-  "m-0 text-[clamp(1.7rem,3vw,2.7rem)] leading-[0.92]";
+  "m-0 font-bold text-[clamp(1.1rem,2vw,1.5rem)] leading-[1]";
 export const panelTitleClass = "m-0 text-[1.18rem] leading-[1.05]";
 export const emptyTitleClass = "m-0 text-2xl";
 
