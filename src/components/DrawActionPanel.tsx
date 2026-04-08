@@ -1,73 +1,50 @@
+import { Badge, Button, Card, Group, Stack, Text, Title } from "@mantine/core";
 import { useShallow } from "zustand/react/shallow";
 import { useSeatStore } from "../store/seatStore";
-import {
-  badgeClass,
-  buttonRowClass,
-  errorTextClass,
-  flowCardClass,
-  ghostButtonClass,
-  headRowClass,
-  helperTextClass,
-  primaryButtonWideClass,
-  sectionKickerClass,
-} from "./ui";
 
 export function DrawActionPanel() {
-  const {
-    assignments,
-    errorMessage,
-    statusMessage,
-    isDrawing,
-    onRunDraw,
-    onResetCurrentDraft,
-  } = useSeatStore(
-    useShallow((s) => ({
-      assignments: s.assignments,
-      isAdvancedOpen: s.isAdvancedOpen,
-      errorMessage: s.errorMessage,
-      statusMessage: s.statusMessage,
-      isDrawing: s.isDrawing,
-      onRunDraw: s.onRunDraw,
-      onResetCurrentDraft: s.onResetCurrentDraft,
-    })),
-  );
+  const { assignments, errorMessage, statusMessage, isDrawing, onRunDraw, onResetCurrentDraft } =
+    useSeatStore(
+      useShallow((s) => ({
+        assignments: s.assignments,
+        errorMessage: s.errorMessage,
+        statusMessage: s.statusMessage,
+        isDrawing: s.isDrawing,
+        onRunDraw: s.onRunDraw,
+        onResetCurrentDraft: s.onResetCurrentDraft,
+      })),
+    );
 
   const hasAssignments = assignments.length > 0;
 
   return (
-    <section className={flowCardClass}>
-      <div className={headRowClass}>
-        <div>
-          <p className={sectionKickerClass}>3. 자리 뽑기</p>
-        </div>
-        <span className={badgeClass}>
-          {hasAssignments ? "결과 있음" : "대기 중"}
-        </span>
-      </div>
+    <Card shadow="sm" radius="lg" withBorder>
+      <Stack gap="sm">
+        <Group justify="space-between">
+          <Title order={5} c="teal.7">3. 자리 뽑기</Title>
+          <Badge color={hasAssignments ? "green" : "gray"} variant="light">
+            {hasAssignments ? "결과 있음" : "대기 중"}
+          </Badge>
+        </Group>
 
-      {errorMessage ? <p className={errorTextClass}>{errorMessage}</p> : null}
-      {statusMessage ? (
-        <p className={helperTextClass}>{statusMessage}</p>
-      ) : null}
+        {errorMessage && <Text size="sm" c="red.7">{errorMessage}</Text>}
+        {statusMessage && <Text size="sm" c="dimmed">{statusMessage}</Text>}
 
-      <button
-        type="button"
-        className={primaryButtonWideClass}
-        onClick={() => onRunDraw("all")}
-        disabled={isDrawing}
-      >
-        {isDrawing ? "자리 뽑는 중..." : "자리 뽑기"}
-      </button>
-
-      <div className={buttonRowClass}>
-        <button
-          type="button"
-          className={ghostButtonClass}
-          onClick={onResetCurrentDraft}
+        <Button
+          fullWidth
+          size="lg"
+          variant="gradient"
+          gradient={{ from: "teal", to: "blue", deg: 135 }}
+          onClick={() => onRunDraw("all")}
+          loading={isDrawing}
         >
+          {isDrawing ? "자리 뽑는 중..." : "자리 뽑기"}
+        </Button>
+
+        <Button variant="subtle" color="gray" size="xs" onClick={onResetCurrentDraft}>
           현재 초안 초기화
-        </button>
-      </div>
-    </section>
+        </Button>
+      </Stack>
+    </Card>
   );
 }

@@ -1,40 +1,14 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { Button, Card, Drawer, Group, Stack, Text, Title } from '@mantine/core'
 import { useShallow } from 'zustand/react/shallow'
 import { useSeatStore } from '../store/seatStore'
 import { formatHistoryOptions, formatTimestamp } from '../utils/format'
 import { AdvancedSettingsContent } from './AdvancedSettingsPanel'
-import {
-  buttonRowClass,
-  drawerBackdropClass,
-  drawerBodyClass,
-  drawerListClass,
-  drawerPanelClass,
-  emptyCopyClass,
-  ghostButtonClass,
-  headRowClass,
-  helperTextClass,
-  listCardClass,
-  listCardMetaClass,
-  listCardTitleClass,
-  listStackClass,
-  panelTitleClass,
-  primaryButtonClass,
-  sectionKickerClass,
-} from './ui'
 
 export function DrawerOverlay() {
   const {
-    isTemplateDrawerOpen,
-    isHistoryDrawerOpen,
-    isSettingsDrawerOpen,
-    templates,
-    history,
-    onCloseDrawers,
-    onSaveTemplate,
-    onLoadTemplate,
-    onRenameTemplate,
-    onDeleteTemplate,
-    onLoadHistory,
+    isTemplateDrawerOpen, isHistoryDrawerOpen, isSettingsDrawerOpen,
+    templates, history, onCloseDrawers, onSaveTemplate, onLoadTemplate,
+    onRenameTemplate, onDeleteTemplate, onLoadHistory,
   } = useSeatStore(
     useShallow((s) => ({
       isTemplateDrawerOpen: s.isTemplateDrawerOpen,
@@ -51,121 +25,75 @@ export function DrawerOverlay() {
     })),
   )
 
-  const panelRef = useRef<HTMLElement>(null)
-
-  const handleClose = useCallback(() => onCloseDrawers(), [onCloseDrawers])
-
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        handleClose()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    panelRef.current?.focus()
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [handleClose])
-
-  if (!isTemplateDrawerOpen && !isHistoryDrawerOpen && !isSettingsDrawerOpen) {
-    return null
-  }
-
-  const drawerLabel = isSettingsDrawerOpen ? '고급 설정' : isTemplateDrawerOpen ? '저장된 템플릿' : '최근 이력'
+  const opened = isTemplateDrawerOpen || isHistoryDrawerOpen || isSettingsDrawerOpen
+  const drawerTitle = isSettingsDrawerOpen ? '고급 설정' : isTemplateDrawerOpen ? '저장된 템플릿' : '최근 이력'
 
   return (
-    <div className={drawerBackdropClass} onClick={handleClose}>
-      <aside
-        ref={panelRef}
-        className={drawerPanelClass}
-        onClick={(event) => event.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-label={drawerLabel}
-        tabIndex={-1}
-      >
-        <div className={headRowClass}>
-          <div>
-            <p className={sectionKickerClass}>{isSettingsDrawerOpen ? '설정' : isTemplateDrawerOpen ? '템플릿' : '이력'}</p>
-            <h2 className={panelTitleClass}>{drawerLabel}</h2>
-          </div>
-          <button type="button" className={ghostButtonClass} onClick={handleClose}>
-            닫기
-          </button>
-        </div>
-
-        {isSettingsDrawerOpen ? (
-          <div className={drawerBodyClass}>
-            <AdvancedSettingsContent />
-          </div>
-        ) : isTemplateDrawerOpen ? (
-          <div className={drawerBodyClass}>
-            <p className={helperTextClass}>
-              현재 명단, 좌석 배치, 고정석 상태를 템플릿으로 저장할 수 있습니다.
-            </p>
-            <div className={buttonRowClass}>
-              <button type="button" className={primaryButtonClass} onClick={onSaveTemplate}>
-                현재 상태 저장
-              </button>
-            </div>
-            <div className={`${listStackClass} ${drawerListClass}`}>
-              {templates.length > 0 ? (
-                templates.map((template) => (
-                  <article key={template.id} className={listCardClass}>
+    <Drawer
+      opened={opened}
+      onClose={onCloseDrawers}
+      title={<Title order={4}>{drawerTitle}</Title>}
+      position="right"
+      size="md"
+      overlayProps={{ backgroundOpacity: 0.35, blur: 4 }}
+      className="print:hidden"
+    >
+      {isSettingsDrawerOpen ? (
+        <AdvancedSettingsContent />
+      ) : isTemplateDrawerOpen ? (
+        <Stack gap="md">
+          <Text size="sm" c="dimmed">
+            현재 명단, 좌석 배치, 고정석 상태를 템플릿으로 저장할 수 있습니다.
+          </Text>
+          <Button variant="gradient" gradient={{ from: "teal", to: "blue", deg: 135 }} onClick={onSaveTemplate}>
+            현재 상태 저장
+          </Button>
+          <Stack gap="sm">
+            {templates.length > 0 ? (
+              templates.map((template) => (
+                <Card key={template.id} withBorder radius="md" p="sm">
+                  <Group justify="space-between" wrap="wrap">
                     <div>
-                      <strong className={listCardTitleClass}>{template.name}</strong>
-                      <small className={listCardMetaClass}>
-                        {template.participantInput ? '명단 포함' : '빈 템플릿'}
-                      </small>
+                      <Text fw={600} size="sm">{template.name}</Text>
+                      <Text size="xs" c="dimmed">{template.participantInput ? '명단 포함' : '빈 템플릿'}</Text>
                     </div>
-                    <div className={buttonRowClass}>
-                      <button type="button" className={ghostButtonClass} onClick={() => onLoadTemplate(template)}>
-                        불러오기
-                      </button>
-                      <button type="button" className={ghostButtonClass} onClick={() => onRenameTemplate(template)}>
-                        이름 변경
-                      </button>
-                      <button type="button" className={ghostButtonClass} onClick={() => onDeleteTemplate(template)}>
-                        삭제
-                      </button>
-                    </div>
-                  </article>
-                ))
-              ) : (
-                <p className={emptyCopyClass}>저장된 템플릿이 없습니다.</p>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className={drawerBodyClass}>
-            <p className={helperTextClass}>
-              최근 자리 뽑기 결과를 확인하고 현재 화면으로 다시 불러올 수 있습니다.
-            </p>
-            <div className={`${listStackClass} ${drawerListClass}`}>
-              {history.length > 0 ? (
-                history.map((entry) => (
-                  <article key={entry.id} className={listCardClass}>
+                    <Group gap="xs">
+                      <Button variant="subtle" size="xs" onClick={() => onLoadTemplate(template)}>불러오기</Button>
+                      <Button variant="subtle" size="xs" onClick={() => onRenameTemplate(template)}>이름 변경</Button>
+                      <Button variant="subtle" size="xs" color="red" onClick={() => onDeleteTemplate(template)}>삭제</Button>
+                    </Group>
+                  </Group>
+                </Card>
+              ))
+            ) : (
+              <Text size="sm" c="dimmed">저장된 템플릿이 없습니다.</Text>
+            )}
+          </Stack>
+        </Stack>
+      ) : (
+        <Stack gap="md">
+          <Text size="sm" c="dimmed">
+            최근 자리 뽑기 결과를 확인하고 현재 화면으로 다시 불러올 수 있습니다.
+          </Text>
+          <Stack gap="sm">
+            {history.length > 0 ? (
+              history.map((entry) => (
+                <Card key={entry.id} withBorder radius="md" p="sm">
+                  <Group justify="space-between" wrap="wrap">
                     <div>
-                      <strong className={listCardTitleClass}>{formatTimestamp(entry.timestamp)}</strong>
-                      <small className={listCardMetaClass}>{formatHistoryOptions(entry.optionsUsed)}</small>
+                      <Text fw={600} size="sm">{formatTimestamp(entry.timestamp)}</Text>
+                      <Text size="xs" c="dimmed">{formatHistoryOptions(entry.optionsUsed)}</Text>
                     </div>
-                    <div className={buttonRowClass}>
-                      <button type="button" className={ghostButtonClass} onClick={() => onLoadHistory(entry)}>
-                        불러오기
-                      </button>
-                    </div>
-                  </article>
-                ))
-              ) : (
-                <p className={emptyCopyClass}>저장된 이력이 아직 없습니다.</p>
-              )}
-            </div>
-          </div>
-        )}
-      </aside>
-    </div>
+                    <Button variant="subtle" size="xs" onClick={() => onLoadHistory(entry)}>불러오기</Button>
+                  </Group>
+                </Card>
+              ))
+            ) : (
+              <Text size="sm" c="dimmed">저장된 이력이 아직 없습니다.</Text>
+            )}
+          </Stack>
+        </Stack>
+      )}
+    </Drawer>
   )
 }

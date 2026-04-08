@@ -19,45 +19,9 @@
     min-width: 320px;
     min-height: 100vh;
     background:
-      radial-gradient(circle at top left, rgba(255, 217, 102, 0.52), transparent 24%),
-      radial-gradient(circle at right, rgba(56, 189, 248, 0.16), transparent 24%),
-      linear-gradient(160deg, #fffdf6 0%, #f4f7fb 58%, #eef3ff 100%);
-  }
-
-  button,
-  input,
-  textarea,
-  select {
-    font: inherit;
-  }
-
-  button {
-    cursor: pointer;
-  }
-
-  input,
-  textarea,
-  select {
-    border: 1px solid rgba(148, 163, 184, 0.32);
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.94);
-    padding: 10px 12px;
-    color: inherit;
-    outline: none;
-    transition:
-      border-color 180ms ease,
-      box-shadow 180ms ease;
-  }
-
-  input:focus,
-  textarea:focus,
-  select:focus {
-    border-color: rgba(14, 116, 144, 0.55);
-    box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.18);
-  }
-
-  textarea {
-    resize: vertical;
+      radial-gradient(circle at top left, rgba(255, 217, 102, 0.32), transparent 24%),
+      radial-gradient(circle at right, rgba(56, 189, 248, 0.12), transparent 24%),
+      linear-gradient(160deg, #fafbfe 0%, #f4f7fb 58%, #eef3ff 100%);
   }
 
   #root {

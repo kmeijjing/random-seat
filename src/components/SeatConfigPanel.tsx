@@ -1,34 +1,11 @@
+import { Badge, Button, Card, Group, NumberInput, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
-import {
-  selectParticipants,
-  selectRecommendedLayouts,
-  selectUsableSeatCount,
-} from "../store/seatSelectors";
+import { selectParticipants, selectRecommendedLayouts, selectUsableSeatCount } from "../store/seatSelectors";
 import { useSeatStore } from "../store/seatStore";
-import {
-  badgeClass,
-  buttonRowClass,
-  fieldClass,
-  fieldLabelClass,
-  fieldRowClass,
-  flowCardClass,
-  headRowClass,
-  recommendationChipClass,
-  recommendationMetaClass,
-  sectionKickerClass,
-  summaryCardClass,
-  summaryLabelClass,
-  summaryValueClass,
-} from "./ui";
 
 export function SeatConfigPanel() {
-  const {
-    seatConfig,
-    participantInput,
-    onDimensionChange,
-    onApplyRecommendation,
-  } = useSeatStore(
+  const { seatConfig, participantInput, onDimensionChange, onApplyRecommendation } = useSeatStore(
     useShallow((s) => ({
       seatConfig: s.seatConfig,
       participantInput: s.participantInput,
@@ -38,17 +15,11 @@ export function SeatConfigPanel() {
   );
 
   const participants = useMemo(
-    () =>
-      selectParticipants({ participantInput } as Parameters<
-        typeof selectParticipants
-      >[0]),
+    () => selectParticipants({ participantInput } as Parameters<typeof selectParticipants>[0]),
     [participantInput],
   );
   const usableSeatCount = useMemo(
-    () =>
-      selectUsableSeatCount({ seatConfig } as Parameters<
-        typeof selectUsableSeatCount
-      >[0]),
+    () => selectUsableSeatCount({ seatConfig } as Parameters<typeof selectUsableSeatCount>[0]),
     [seatConfig],
   );
   const recommendedLayouts = useMemo(
@@ -57,71 +28,62 @@ export function SeatConfigPanel() {
   );
 
   return (
-    <section className={flowCardClass}>
-      <div className={headRowClass}>
-        <div>
-          <p className={sectionKickerClass}>2. 좌석 설정</p>
-        </div>
-        <span className={badgeClass}>{usableSeatCount}석</span>
-      </div>
+    <Card shadow="sm" radius="lg" withBorder>
+      <Stack gap="sm">
+        <Group justify="space-between">
+          <Title order={5} c="teal.7">2. 좌석 설정</Title>
+          <Badge color="amber" variant="light">{usableSeatCount}석</Badge>
+        </Group>
 
-      <div className={fieldRowClass}>
-        <label className={fieldClass}>
-          <span className={fieldLabelClass}>행</span>
-          <input
-            type="number"
-            min="1"
+        <SimpleGrid cols={2}>
+          <NumberInput
+            label="행"
+            min={1}
             value={seatConfig.rows}
-            onChange={(event) => onDimensionChange("rows", event.target.value)}
+            onChange={(val) => onDimensionChange("rows", String(val))}
+            size="sm"
           />
-        </label>
-        <label className={fieldClass}>
-          <span className={fieldLabelClass}>열</span>
-          <input
-            type="number"
-            min="1"
+          <NumberInput
+            label="열"
+            min={1}
             value={seatConfig.columns}
-            onChange={(event) =>
-              onDimensionChange("columns", event.target.value)
-            }
+            onChange={(val) => onDimensionChange("columns", String(val))}
+            size="sm"
           />
-        </label>
-      </div>
+        </SimpleGrid>
 
-      <div className={buttonRowClass}>
-        {recommendedLayouts.map((recommendation) => (
-          <button
-            key={recommendation.label}
-            type="button"
-            className={recommendationChipClass}
-            onClick={() =>
-              onApplyRecommendation(recommendation.rows, recommendation.columns)
-            }
-          >
-            {recommendation.label}
-            <small className={recommendationMetaClass}>
-              {recommendation.emptyCount}칸 여유
-            </small>
-          </button>
-        ))}
-      </div>
+        <Group gap="xs">
+          {recommendedLayouts.map((rec) => (
+            <Button
+              key={rec.label}
+              variant="light"
+              color="cyan"
+              size="xs"
+              onClick={() => onApplyRecommendation(rec.rows, rec.columns)}
+            >
+              {rec.label}
+              <Text span size="xs" c="dimmed" ml={4}>{rec.emptyCount}칸 여유</Text>
+            </Button>
+          ))}
+        </Group>
 
-      <div className={summaryCardClass}>
-        <div>
-          <span className={summaryLabelClass}>사용 가능 좌석</span>
-          <strong className={summaryValueClass}>{usableSeatCount}석</strong>
-        </div>
-        <div>
-          <span className={summaryLabelClass}>참여자</span>
-          <strong className={summaryValueClass}>{participants.length}명</strong>
-        </div>
-        <div>
-          <span className={summaryLabelClass}>남는 좌석</span>
-          <strong className={summaryValueClass}>
-            {Math.max(usableSeatCount - participants.length, 0)}석
-          </strong>
-        </div>
-      </div>
-    </section>
+        <Card withBorder radius="md" bg="amber.0" p="sm">
+          <SimpleGrid cols={3}>
+            <div>
+              <Text size="xs" c="dimmed">사용 가능 좌석</Text>
+              <Text fw={600}>{usableSeatCount}석</Text>
+            </div>
+            <div>
+              <Text size="xs" c="dimmed">참여자</Text>
+              <Text fw={600}>{participants.length}명</Text>
+            </div>
+            <div>
+              <Text size="xs" c="dimmed">남는 좌석</Text>
+              <Text fw={600}>{Math.max(usableSeatCount - participants.length, 0)}석</Text>
+            </div>
+          </SimpleGrid>
+        </Card>
+      </Stack>
+    </Card>
   );
 }
