@@ -1,5 +1,8 @@
 import { createTheme, MantineProvider } from '@mantine/core'
 import '@mantine/core/styles.css'
+import { ModalsProvider } from '@mantine/modals'
+import { Notifications } from '@mantine/notifications'
+import '@mantine/notifications/styles.css'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
@@ -30,9 +33,12 @@ const theme = createTheme({
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <MantineProvider theme={theme}>
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
+      <ModalsProvider>
+        <Notifications position="bottom-right" />
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
+      </ModalsProvider>
     </MantineProvider>
   </React.StrictMode>,
 )
