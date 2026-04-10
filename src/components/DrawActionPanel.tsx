@@ -1,4 +1,5 @@
 import { Badge, Button, Card, Group, Stack, Text, Title } from "@mantine/core";
+import { modals } from "@mantine/modals";
 import { useShallow } from "zustand/react/shallow";
 import { useSeatStore } from "../store/seatStore";
 
@@ -16,6 +17,19 @@ export function DrawActionPanel() {
     );
 
   const hasAssignments = assignments.length > 0;
+
+  const handleResetClick = () =>
+    modals.openConfirmModal({
+      title: "현재 초안을 초기화할까요?",
+      children: (
+        <Text size="sm">
+          입력한 명단과 좌석 설정, 고정석, 뽑기 결과가 모두 지워집니다. 저장한 템플릿과 이력은 그대로 남습니다.
+        </Text>
+      ),
+      labels: { confirm: "초기화", cancel: "취소" },
+      confirmProps: { color: "red" },
+      onConfirm: onResetCurrentDraft,
+    });
 
   return (
     <Card shadow="sm" radius="lg" withBorder>
@@ -41,7 +55,7 @@ export function DrawActionPanel() {
           {isDrawing ? "자리 뽑는 중..." : "자리 뽑기"}
         </Button>
 
-        <Button variant="subtle" color="gray" size="xs" onClick={onResetCurrentDraft}>
+        <Button variant="subtle" color="gray" size="xs" onClick={handleResetClick}>
           현재 초안 초기화
         </Button>
       </Stack>
