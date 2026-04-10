@@ -60,6 +60,7 @@ export type DrawSettings = {
   redrawMode: 'all' | 'selected'
   avoidPreviousSeat: boolean
   balanceZones: boolean
+  continuousNumbering: boolean
 }
 
 export type DrawOptions = DrawSettings & {

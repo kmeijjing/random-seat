@@ -7,7 +7,7 @@ import { useSeatStore } from '../store/seatStore'
 
 export function AdvancedSettingsContent() {
   const {
-    drawSettings, onAvoidPreviousSeatChange, onBalanceZonesChange,
+    drawSettings, onAvoidPreviousSeatChange, onBalanceZonesChange, onContinuousNumberingChange,
     fixedSeats, fixedParticipantId, fixedCellId, participantInput, seatConfig,
     onFixedParticipantChange, onFixedCellChange, onAddFixedSeat, onRemoveFixedSeat,
     onCycleCellType, onClearAllStorage,
@@ -16,6 +16,7 @@ export function AdvancedSettingsContent() {
       drawSettings: s.drawSettings,
       onAvoidPreviousSeatChange: s.onAvoidPreviousSeatChange,
       onBalanceZonesChange: s.onBalanceZonesChange,
+      onContinuousNumberingChange: s.onContinuousNumberingChange,
       fixedSeats: s.fixedSeats,
       fixedParticipantId: s.fixedParticipantId,
       fixedCellId: s.fixedCellId,
@@ -57,6 +58,13 @@ export function AdvancedSettingsContent() {
             label="자리 편중 줄이기"
             checked={drawSettings.balanceZones}
             onChange={(event) => onBalanceZonesChange(event.currentTarget.checked)}
+            size="sm"
+          />
+          <Checkbox
+            label="연속 좌석 번호 표시 (통로·비활성 건너뛰기)"
+            description="켜면 좌석 카드에 1번, 2번… 순서로 표시, 끄면 행-열 좌표로 표시합니다."
+            checked={drawSettings.continuousNumbering}
+            onChange={(event) => onContinuousNumberingChange(event.currentTarget.checked)}
             size="sm"
           />
         </Stack>

@@ -12,6 +12,7 @@ const baseOptions: DrawOptions = {
   redrawMode: 'all',
   avoidPreviousSeat: false,
   balanceZones: false,
+  continuousNumbering: true,
   selectedParticipantIds: [],
 }
 

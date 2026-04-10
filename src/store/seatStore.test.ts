@@ -122,6 +122,7 @@ describe('seatStore', () => {
           redrawMode: 'all',
           avoidPreviousSeat: false,
           balanceZones: false,
+          continuousNumbering: true,
         },
       },
       templates: [],

@@ -232,6 +232,9 @@ export function ResultPanel() {
                   const isSearchMatch = matchingCellIds.has(cell.id);
                   const fixedSeat = fixedSeats.find((item) => item.cellId === cell.id);
                   const seatNumber = seatNumberMap.get(cell.id);
+                  const primaryLabel = drawSettings.continuousNumbering && seatNumber
+                    ? `${seatNumber}번`
+                    : cell.label;
                   const animationDelay = `${Math.min(index * 30, 900)}ms`;
 
                   if (cell.type !== "seat") {
@@ -269,10 +272,11 @@ export function ResultPanel() {
                         outline: isSearchMatch ? "3px solid var(--mantine-color-orange-2)" : undefined,
                       }}
                     >
-                      <Text size="xs" fw={800} c="orange.7">{cell.label}</Text>
+                      <Text size="xs" fw={800} c="orange.7">{primaryLabel}</Text>
                       <Text fw={600} size="sm">{assignment?.participant?.displayName ?? "빈자리"}</Text>
                       <Text size="xs" c="dimmed">
-                        {seatNumber}번 자리{fixedSeat ? " · 고정석" : ""}
+                        {drawSettings.continuousNumbering ? `칸 ${cell.label}` : `${seatNumber}번 자리`}
+                        {fixedSeat ? " · 고정석" : ""}
                       </Text>
                     </Card>
                   );

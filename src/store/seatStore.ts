@@ -67,6 +67,7 @@ export type SeatStoreActions = {
   onFixedCellChange: (value: string) => void
   onAvoidPreviousSeatChange: (checked: boolean) => void
   onBalanceZonesChange: (checked: boolean) => void
+  onContinuousNumberingChange: (checked: boolean) => void
   onToggleAdvanced: () => void
   onToggleSeatEditor: () => void
   onRunDraw: (redrawMode: 'all' | 'selected') => void
@@ -289,6 +290,11 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
         onBalanceZonesChange: (checked) =>
           set((state) => ({
             drawSettings: { ...state.drawSettings, balanceZones: checked },
+          })),
+
+        onContinuousNumberingChange: (checked) =>
+          set((state) => ({
+            drawSettings: { ...state.drawSettings, continuousNumbering: checked },
           })),
 
         onToggleAdvanced: () => set((state) => ({ isAdvancedOpen: !state.isAdvancedOpen })),

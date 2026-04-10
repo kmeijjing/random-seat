@@ -22,6 +22,7 @@ const defaultDrawSettings: DrawSettings = {
   redrawMode: 'all',
   avoidPreviousSeat: true,
   balanceZones: true,
+  continuousNumbering: true,
 }
 
 function createDefaultSeatConfig(): SeatConfig {
@@ -226,6 +227,10 @@ function normalizeDrawSettings(value?: unknown): DrawSettings {
     avoidPreviousSeat: normalizeBoolean(
       source?.avoidPreviousSeat,
       defaultDrawSettings.avoidPreviousSeat,
+    ),
+    continuousNumbering: normalizeBoolean(
+      source?.continuousNumbering,
+      defaultDrawSettings.continuousNumbering,
     ),
     balanceZones: normalizeBoolean(
       source?.balanceZones,
