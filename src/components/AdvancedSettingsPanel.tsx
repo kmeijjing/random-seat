@@ -1,6 +1,6 @@
 import { Accordion, Button, Card, Checkbox, Group, Select, SimpleGrid, Stack, Text } from '@mantine/core'
 import { modals } from '@mantine/modals'
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { selectParticipants, selectSelectableSeatCells, selectUsableSeatCount } from '../store/seatSelectors'
 import { useSeatStore } from '../store/seatStore'
@@ -36,6 +36,9 @@ export function AdvancedSettingsContent() {
 
   const sortedFixedSeats = fixedSeats.slice().sort((left, right) => left.cellId.localeCompare(right.cellId))
 
+  const cellSelectRef = useRef<HTMLInputElement>(null)
+  const bothSelected = Boolean(fixedParticipantId && fixedCellId)
+
   return (
     <Stack gap="md">
       <Card withBorder radius="md" p="sm">
@@ -70,12 +73,19 @@ export function AdvancedSettingsContent() {
               label="학생 선택"
               placeholder="학생 선택"
               value={fixedParticipantId || null}
-              onChange={(val) => onFixedParticipantChange(val ?? '')}
-              data={participants.map((p) => ({ value: p.id, label: p.name }))}
+              onChange={(val) => {
+                onFixedParticipantChange(val ?? '')
+                if (val) {
+                  // 학생 선택 직후 좌석 드롭다운으로 포커스 이동
+                  requestAnimationFrame(() => cellSelectRef.current?.focus())
+                }
+              }}
+              data={participants.map((p) => ({ value: p.id, label: p.displayName }))}
               size="sm"
               clearable
             />
             <Select
+              ref={cellSelectRef}
               label="좌석 선택"
               placeholder="좌석 선택"
               value={fixedCellId || null}
@@ -85,7 +95,14 @@ export function AdvancedSettingsContent() {
               clearable
             />
           </SimpleGrid>
-          <Button variant="light" size="xs" onClick={onAddFixedSeat}>고정석 저장</Button>
+          <Button
+            variant={bothSelected ? 'filled' : 'light'}
+            size="xs"
+            onClick={onAddFixedSeat}
+            disabled={!bothSelected}
+          >
+            고정석 저장
+          </Button>
 
           <Stack gap="xs" style={{ maxHeight: 150, overflow: 'auto' }}>
             {sortedFixedSeats.length > 0 ? (
