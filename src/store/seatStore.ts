@@ -218,10 +218,8 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
             },
           })
           clearDraftAssignments()
-          set({
-            statusMessage: `${rows} x ${columns} 추천 좌석판을 적용했습니다.`,
-            errorMessage: '',
-          })
+          set({ statusMessage: '', errorMessage: '' })
+          browser.notify('success', `${rows} x ${columns} 추천 좌석판을 적용했습니다.`)
         },
 
         onCycleCellType: (cellId) => {
@@ -265,10 +263,8 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
             fixedCellId: '',
           })
           clearDraftAssignments()
-          set({
-            statusMessage: `${participant.displayName} 학생을 ${seatCell.label}에 고정했습니다.`,
-            errorMessage: '',
-          })
+          set({ statusMessage: '', errorMessage: '' })
+          browser.notify('success', `${participant.displayName} 학생을 ${seatCell.label}에 고정했습니다.`)
         },
 
         onRemoveFixedSeat: (participantId) => {
@@ -276,7 +272,8 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
             fixedSeats: state.fixedSeats.filter((fs) => fs.participantId !== participantId),
           }))
           clearDraftAssignments()
-          set({ statusMessage: '고정석을 해제했습니다.', errorMessage: '' })
+          set({ statusMessage: '', errorMessage: '' })
+          browser.notify('success', '고정석을 해제했습니다.')
         },
 
         onFixedParticipantChange: (value) => set({ fixedParticipantId: value }),
@@ -448,9 +445,10 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
 
           try {
             await browser.copyText(text)
-            set({ statusMessage: '자리표를 텍스트로 복사했습니다.', errorMessage: '' })
+            set({ errorMessage: '' })
+            browser.notify('success', '자리표를 텍스트로 복사했습니다.')
           } catch {
-            set({ errorMessage: '클립보드 복사에 실패했습니다.' })
+            browser.notify('error', '클립보드 복사에 실패했습니다.')
           }
         },
 
