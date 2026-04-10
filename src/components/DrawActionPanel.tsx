@@ -1,29 +1,78 @@
-import { Badge, Button, Card, Group, Stack, Text, Title } from "@mantine/core";
+import {
+  Badge,
+  Button,
+  Card,
+  Group,
+  Stack,
+  Text,
+  Title,
+  Tooltip,
+} from "@mantine/core";
 import { modals } from "@mantine/modals";
+import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
+import {
+  selectParticipants,
+  selectUsableSeatCount,
+} from "../store/seatSelectors";
 import { useSeatStore } from "../store/seatStore";
 
 export function DrawActionPanel() {
-  const { assignments, errorMessage, statusMessage, isDrawing, onRunDraw, onResetCurrentDraft } =
-    useSeatStore(
-      useShallow((s) => ({
-        assignments: s.assignments,
-        errorMessage: s.errorMessage,
-        statusMessage: s.statusMessage,
-        isDrawing: s.isDrawing,
-        onRunDraw: s.onRunDraw,
-        onResetCurrentDraft: s.onResetCurrentDraft,
-      })),
-    );
+  const {
+    assignments,
+    errorMessage,
+    statusMessage,
+    isDrawing,
+    onRunDraw,
+    onResetCurrentDraft,
+    participantInput,
+    seatConfig,
+  } = useSeatStore(
+    useShallow((s) => ({
+      assignments: s.assignments,
+      errorMessage: s.errorMessage,
+      statusMessage: s.statusMessage,
+      isDrawing: s.isDrawing,
+      onRunDraw: s.onRunDraw,
+      onResetCurrentDraft: s.onResetCurrentDraft,
+      participantInput: s.participantInput,
+      seatConfig: s.seatConfig,
+    })),
+  );
 
   const hasAssignments = assignments.length > 0;
+
+  const participants = useMemo(
+    () =>
+      selectParticipants({ participantInput } as Parameters<
+        typeof selectParticipants
+      >[0]),
+    [participantInput],
+  );
+  const usableSeatCount = useMemo(
+    () =>
+      selectUsableSeatCount({ seatConfig } as Parameters<
+        typeof selectUsableSeatCount
+      >[0]),
+    [seatConfig],
+  );
+
+  const disabledReason =
+    participants.length === 0
+      ? "먼저 명단을 입력해 주세요"
+      : participants.length > usableSeatCount
+        ? `좌석이 부족합니다 (참여자 ${participants.length}명 / 좌석 ${usableSeatCount}석)`
+        : null;
+  const canDraw = disabledReason === null;
 
   const handleResetClick = () =>
     modals.openConfirmModal({
       title: "현재 초안을 초기화할까요?",
       children: (
         <Text size="sm">
-          입력한 명단과 좌석 설정, 고정석, 뽑기 결과가 모두 지워집니다. 저장한 템플릿과 이력은 그대로 남습니다.
+          입력한 명단과 좌석 설정, 고정석, 뽑기 결과가 모두 지워집니다.
+          <br />
+          저장한 템플릿과 이력은 그대로 남습니다.
         </Text>
       ),
       labels: { confirm: "초기화", cancel: "취소" },
@@ -35,27 +84,51 @@ export function DrawActionPanel() {
     <Card shadow="sm" radius="lg" withBorder>
       <Stack gap="sm">
         <Group justify="space-between">
-          <Title order={5} c="orange.7">3. 자리 뽑기</Title>
+          <Title order={5} c="orange.7">
+            3. 자리 뽑기
+          </Title>
           <Badge color={hasAssignments ? "green" : "gray"} variant="light">
             {hasAssignments ? "결과 있음" : "대기 중"}
           </Badge>
         </Group>
 
-        {errorMessage && <Text size="sm" c="red.7">{errorMessage}</Text>}
-        {statusMessage && <Text size="sm" c="dimmed">{statusMessage}</Text>}
+        {errorMessage && (
+          <Text size="sm" c="red.7">
+            {errorMessage}
+          </Text>
+        )}
+        {statusMessage && (
+          <Text size="sm" c="dimmed">
+            {statusMessage}
+          </Text>
+        )}
+
+        <Tooltip
+          label={disabledReason ?? ""}
+          disabled={canDraw}
+          withArrow
+          position="top"
+        >
+          <Button
+            fullWidth
+            size="lg"
+            variant="gradient"
+            gradient={{ from: "orange.6", to: "orange.3", deg: 135 }}
+            onClick={() => onRunDraw("all")}
+            loading={isDrawing}
+            disabled={!canDraw}
+            data-disabled={!canDraw || undefined}
+          >
+            {isDrawing ? "자리 뽑는 중..." : "자리 뽑기"}
+          </Button>
+        </Tooltip>
 
         <Button
-          fullWidth
-          size="lg"
-          variant="gradient"
-          gradient={{ from: "orange.6", to: "orange.3", deg: 135 }}
-          onClick={() => onRunDraw("all")}
-          loading={isDrawing}
+          variant="subtle"
+          color="gray"
+          size="xs"
+          onClick={handleResetClick}
         >
-          {isDrawing ? "자리 뽑는 중..." : "자리 뽑기"}
-        </Button>
-
-        <Button variant="subtle" color="gray" size="xs" onClick={handleResetClick}>
           현재 초안 초기화
         </Button>
       </Stack>
