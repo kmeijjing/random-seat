@@ -250,7 +250,7 @@ export function ResultPanel() {
                     {redrawCandidates.map((assignment) => (
                       <Checkbox
                         key={assignment.participant!.id}
-                        label={assignment.participant!.name}
+                        label={assignment.participant!.displayName}
                         checked={selectedParticipantsForRedraw.includes(assignment.participant!.id)}
                         onChange={() => onToggleRedrawParticipant(assignment.participant!.id)}
                         size="sm"
