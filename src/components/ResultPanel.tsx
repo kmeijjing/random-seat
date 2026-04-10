@@ -8,11 +8,12 @@ import { selectSeatNumberMap } from "../store/seatSelectors";
 import { useSeatStore } from "../store/seatStore";
 import { formatTimestamp } from "../utils/format";
 import { NameInputModalBody } from "./NameInputModalBody";
+import { PrintPreviewModalBody } from "./PrintPreviewModal";
 
 export function ResultPanel() {
   const {
     assignments, updatedAt, drawSettings, searchQuery, onSearchQueryChange,
-    onCopyResult, onPrint, isDrawing, onRunDraw, onToggleRedrawPicker,
+    onCopyResult, isDrawing, onRunDraw, onToggleRedrawPicker,
     isRedrawPickerOpen, selectedParticipantsForRedraw, onToggleRedrawParticipant,
     onSelectAllForRedraw, onDeselectAllForRedraw, seatConfig, fixedSeats,
     onSaveTemplate, onAddFixedSeat,
@@ -20,7 +21,7 @@ export function ResultPanel() {
     useShallow((s) => ({
       assignments: s.assignments, updatedAt: s.updatedAt, drawSettings: s.drawSettings,
       searchQuery: s.searchQuery, onSearchQueryChange: s.onSearchQueryChange,
-      onCopyResult: s.onCopyResult, onPrint: s.onPrint, isDrawing: s.isDrawing,
+      onCopyResult: s.onCopyResult, isDrawing: s.isDrawing,
       onRunDraw: s.onRunDraw, onToggleRedrawPicker: s.onToggleRedrawPicker,
       isRedrawPickerOpen: s.isRedrawPickerOpen,
       selectedParticipantsForRedraw: s.selectedParticipantsForRedraw,
@@ -56,6 +57,16 @@ export function ResultPanel() {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       (el as HTMLTextAreaElement).focus();
     }
+  };
+
+  const openPrintPreviewModal = () => {
+    if (!hasAssignments) return;
+    const modalId = "print-preview";
+    modals.open({
+      modalId,
+      title: "인쇄 미리보기",
+      children: <PrintPreviewModalBody modalId={modalId} />,
+    });
   };
 
   const openSaveTemplateModal = () => {
@@ -165,7 +176,7 @@ export function ResultPanel() {
                   color="gray"
                   size="xs"
                   leftSection={<IoPrintOutline />}
-                  onClick={onPrint}
+                  onClick={openPrintPreviewModal}
                   disabled={!hasAssignments}
                 >
                   인쇄
