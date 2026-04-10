@@ -1,10 +1,12 @@
-import { Badge, Button, Card, Checkbox, Group, Stack, Text, TextInput, Title, Tooltip } from "@mantine/core";
+import { Badge, Button, Card, Checkbox, Divider, Group, Stack, Text, TextInput, Title, Tooltip } from "@mantine/core";
+import { modals } from "@mantine/modals";
 import { useMemo } from "react";
-import { IoSearchOutline, IoShuffleOutline } from "react-icons/io5";
+import { IoBookmarkOutline, IoCopyOutline, IoPrintOutline, IoSearchOutline, IoShuffleOutline } from "react-icons/io5";
 import { useShallow } from "zustand/react/shallow";
 import { selectSeatNumberMap } from "../store/seatSelectors";
 import { useSeatStore } from "../store/seatStore";
 import { formatTimestamp } from "../utils/format";
+import { NameInputModalBody } from "./NameInputModalBody";
 
 export function ResultPanel() {
   const {
@@ -12,6 +14,7 @@ export function ResultPanel() {
     onCopyResult, onPrint, isDrawing, onRunDraw, onToggleRedrawPicker,
     isRedrawPickerOpen, selectedParticipantsForRedraw, onToggleRedrawParticipant,
     onSelectAllForRedraw, onDeselectAllForRedraw, seatConfig, fixedSeats,
+    onSaveTemplate,
   } = useSeatStore(
     useShallow((s) => ({
       assignments: s.assignments, updatedAt: s.updatedAt, drawSettings: s.drawSettings,
@@ -24,8 +27,26 @@ export function ResultPanel() {
       onSelectAllForRedraw: s.onSelectAllForRedraw,
       onDeselectAllForRedraw: s.onDeselectAllForRedraw,
       seatConfig: s.seatConfig, fixedSeats: s.fixedSeats,
+      onSaveTemplate: s.onSaveTemplate,
     })),
   );
+
+  const openSaveTemplateModal = () => {
+    const modalId = "save-template-from-result";
+    modals.open({
+      modalId,
+      title: "현재 상태를 템플릿으로 저장",
+      children: (
+        <NameInputModalBody
+          modalId={modalId}
+          initialValue="새 템플릿"
+          placeholder="템플릿 이름"
+          confirmLabel="저장"
+          onConfirm={(name) => onSaveTemplate(name)}
+        />
+      ),
+    });
+  };
 
   const updatedAtLabel = formatTimestamp(updatedAt);
   const assignmentMap = useMemo(() => new Map(assignments.map((a) => [a.cellId, a])), [assignments]);
@@ -82,26 +103,58 @@ export function ResultPanel() {
               </Group>
             </Card>
 
-            <Group gap="xs" className="print:hidden">
-              <Button variant="light" color="gray" size="xs" onClick={() => onRunDraw("all")} disabled={isDrawing}>
-                전체 다시 뽑기
-              </Button>
-              <Tooltip label="선택한 학생들만 다시 배정합니다 (고정석 제외)" withArrow>
+            <Group gap="xs" justify="space-between" wrap="wrap" className="print:hidden">
+              <Group gap="xs">
+                <Button variant="light" color="gray" size="xs" onClick={() => onRunDraw("all")} disabled={isDrawing}>
+                  전체 다시 뽑기
+                </Button>
+                <Tooltip label="선택한 학생들만 다시 배정합니다 (고정석 제외)" withArrow>
+                  <Button
+                    variant="light"
+                    color="gray"
+                    size="xs"
+                    leftSection={<IoShuffleOutline />}
+                    onClick={onToggleRedrawPicker}
+                    disabled={isDrawing || redrawCandidates.length === 0}
+                  >
+                    일부만 다시 뽑기
+                  </Button>
+                </Tooltip>
+              </Group>
+              <Divider orientation="vertical" className="max-[900px]:hidden" />
+              <Group gap="xs">
                 <Button
-                  variant="light"
+                  variant="subtle"
                   color="gray"
                   size="xs"
-                  leftSection={<IoShuffleOutline />}
-                  onClick={onToggleRedrawPicker}
-                  disabled={isDrawing || redrawCandidates.length === 0}
+                  leftSection={<IoCopyOutline />}
+                  onClick={onCopyResult}
+                  disabled={!hasAssignments}
                 >
-                  일부만 다시 뽑기
+                  복사
                 </Button>
-              </Tooltip>
-              <div className="ml-auto flex gap-2">
-                <Button variant="subtle" color="gray" size="xs" onClick={onCopyResult} disabled={!hasAssignments}>복사</Button>
-                <Button variant="subtle" color="gray" size="xs" onClick={onPrint} disabled={!hasAssignments}>인쇄</Button>
-              </div>
+                <Button
+                  variant="subtle"
+                  color="gray"
+                  size="xs"
+                  leftSection={<IoPrintOutline />}
+                  onClick={onPrint}
+                  disabled={!hasAssignments}
+                >
+                  인쇄
+                </Button>
+                <Tooltip label="현재 명단·좌석·고정석을 템플릿으로 저장" withArrow>
+                  <Button
+                    variant="subtle"
+                    color="orange"
+                    size="xs"
+                    leftSection={<IoBookmarkOutline />}
+                    onClick={openSaveTemplateModal}
+                  >
+                    템플릿 저장
+                  </Button>
+                </Tooltip>
+              </Group>
             </Group>
 
             {isRedrawPickerOpen && (
