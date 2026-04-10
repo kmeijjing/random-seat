@@ -1,8 +1,10 @@
 import { Badge, Button, Card, Checkbox, Divider, Group, Stack, Text, TextInput, Title, Tooltip } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
-import { useMemo } from "react";
-import { IoBookmarkOutline, IoCopyOutline, IoPrintOutline, IoSearchOutline, IoShuffleOutline } from "react-icons/io5";
+import { notifications } from "@mantine/notifications";
+import { toPng } from "html-to-image";
+import { useMemo, useRef } from "react";
+import { IoBookmarkOutline, IoCopyOutline, IoImageOutline, IoPrintOutline, IoSearchOutline, IoShuffleOutline } from "react-icons/io5";
 import { useShallow } from "zustand/react/shallow";
 import { selectSeatNumberMap } from "../store/seatSelectors";
 import { useSeatStore } from "../store/seatStore";
@@ -56,6 +58,34 @@ export function ResultPanel() {
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
       (el as HTMLTextAreaElement).focus();
+    }
+  };
+
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  const handlePngExport = async () => {
+    if (!gridRef.current) return;
+    try {
+      const PADDING = 24;
+      const rect = gridRef.current.getBoundingClientRect();
+      const dataUrl = await toPng(gridRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: "#fffaf6",
+        width: rect.width + PADDING * 2,
+        height: rect.height + PADDING * 2,
+        style: {
+          padding: `${PADDING}px`,
+          boxSizing: "content-box",
+        },
+      });
+      const link = document.createElement("a");
+      link.download = `자리표_${new Date().toISOString().slice(0, 10)}.png`;
+      link.href = dataUrl;
+      link.click();
+      notifications.show({ message: "자리표 이미지를 저장했습니다.", color: "teal", autoClose: 4000 });
+    } catch {
+      notifications.show({ message: "이미지 저장에 실패했습니다.", color: "red", autoClose: 4000 });
     }
   };
 
@@ -175,6 +205,16 @@ export function ResultPanel() {
                   variant="subtle"
                   color="gray"
                   size="xs"
+                  leftSection={<IoImageOutline />}
+                  onClick={handlePngExport}
+                  disabled={!hasAssignments}
+                >
+                  이미지
+                </Button>
+                <Button
+                  variant="subtle"
+                  color="gray"
+                  size="xs"
                   leftSection={<IoPrintOutline />}
                   onClick={openPrintPreviewModal}
                   disabled={!hasAssignments}
@@ -234,6 +274,7 @@ export function ResultPanel() {
 
             <div className="min-h-0 overflow-auto pr-1 print:overflow-visible print:pr-0">
               <div
+                ref={gridRef}
                 key={updatedAt ?? "initial"}
                 className={`grid gap-2 min-w-max ${isDrawing ? "opacity-60" : ""}`}
                 style={{ gridTemplateColumns: `repeat(${seatConfig.columns}, minmax(118px, 1fr))` }}
