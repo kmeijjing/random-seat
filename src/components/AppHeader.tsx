@@ -1,9 +1,13 @@
 import { ActionIcon, Button, Group, Title, Tooltip } from "@mantine/core";
-import { IoSettingsOutline } from "react-icons/io5";
+import { IoKeypadOutline, IoSettingsOutline } from "react-icons/io5";
 import { useShallow } from "zustand/react/shallow";
 import { useSeatStore } from "../store/seatStore";
 
-export function AppHeader() {
+type AppHeaderProps = {
+  onOpenShortcuts: () => void;
+};
+
+export function AppHeader({ onOpenShortcuts }: AppHeaderProps) {
   const {
     templates,
     history,
@@ -33,6 +37,16 @@ export function AppHeader() {
           <Button variant="outline" size="xs" onClick={onOpenHistoryDrawer}>
             이력 {history.length}
           </Button>
+          <Tooltip label="키보드 단축키 (?)" withArrow>
+            <ActionIcon
+              variant="white"
+              size="lg"
+              onClick={onOpenShortcuts}
+              aria-label="키보드 단축키"
+            >
+              <IoKeypadOutline size={20} />
+            </ActionIcon>
+          </Tooltip>
           <Tooltip label="고급 설정 (배정 옵션, 고정석, 좌석 편집)" withArrow>
             <ActionIcon
               variant="white"
