@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-mantine-color-scheme="dark"], [data-mantine-color-scheme="dark"] *));
+
 @layer base {
   :root {
     font-family:
@@ -7,7 +9,6 @@
     color: #0f172a;
     line-height: 1.5;
     font-weight: 450;
-    color-scheme: light;
   }
 
   * {
@@ -24,9 +25,39 @@
       linear-gradient(160deg, #fffaf6 0%, #fff5ee 58%, #fff0e6 100%);
   }
 
+  [data-mantine-color-scheme="dark"] body {
+    color: #e6e6e6;
+    background:
+      radial-gradient(circle at top left, rgba(255, 140, 80, 0.18), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(100, 60, 30, 0.14), transparent 28%),
+      linear-gradient(160deg, #1a1612 0%, #201a14 58%, #251d16 100%);
+  }
+
   #root {
     min-height: 100vh;
   }
+}
+
+/* 카드/좌석 배경을 라이트/다크 모드에 따라 전환 */
+.bg-surface-warm {
+  background-color: var(--mantine-color-orange-0);
+}
+[data-mantine-color-scheme="dark"] .bg-surface-warm {
+  background-color: var(--mantine-color-dark-6);
+}
+
+.bg-surface-warm-strong {
+  background-color: var(--mantine-color-orange-1);
+}
+[data-mantine-color-scheme="dark"] .bg-surface-warm-strong {
+  background-color: var(--mantine-color-dark-5);
+}
+
+.bg-surface-muted {
+  background-color: var(--mantine-color-gray-1);
+}
+[data-mantine-color-scheme="dark"] .bg-surface-muted {
+  background-color: var(--mantine-color-dark-7);
 }
 
 @keyframes seat-card-reveal {

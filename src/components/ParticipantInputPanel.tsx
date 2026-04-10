@@ -87,7 +87,7 @@ export function ParticipantInputPanel() {
           </Alert>
         )}
 
-        <Card withBorder radius="md" bg="orange.0" p="sm">
+        <Card withBorder radius="md" className="bg-surface-warm" p="sm">
           <Group justify="space-between" mb="xs">
             <Text fw={700} size="sm">
               파싱 미리보기

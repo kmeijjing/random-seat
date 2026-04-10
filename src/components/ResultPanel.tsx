@@ -160,7 +160,7 @@ export function ResultPanel() {
 
         {hasAssignments ? (
           <>
-            <Card withBorder radius="md" bg="orange.0" p="xs" className="print:hidden">
+            <Card withBorder radius="md" p="xs" className="bg-surface-warm print:hidden">
               <Group justify="space-between">
                 <Text size="xs" c="dimmed">마지막 결과: {updatedAtLabel}</Text>
                 <Text size="xs" c="dimmed">
@@ -236,7 +236,7 @@ export function ResultPanel() {
             </Group>
 
             {isRedrawPickerOpen && (
-              <Card withBorder radius="md" bg="orange.0" p="sm" className="print:hidden">
+              <Card withBorder radius="md" p="sm" className="bg-surface-warm print:hidden">
                 <Stack gap="sm">
                   <Group justify="space-between">
                     <Text fw={700} size="sm">다시 뽑을 학생 선택</Text>
@@ -296,8 +296,7 @@ export function ResultPanel() {
                         withBorder
                         radius="md"
                         p="xs"
-                        bg="gray.1"
-                        className="seat-card-animate"
+                        className="seat-card-animate bg-surface-muted"
                         style={{ borderStyle: "dashed", minHeight: 96, animationDelay }}
                       >
                         <Text size="xs" fw={800} c="orange.7">{cell.label}</Text>
@@ -313,8 +312,7 @@ export function ResultPanel() {
                       withBorder
                       radius="md"
                       p="xs"
-                      bg={assignment?.isFixed ? "orange.1" : "orange.0"}
-                      className="seat-card-animate"
+                      className={`seat-card-animate ${assignment?.isFixed ? "bg-surface-warm-strong" : "bg-surface-warm"}`}
                       onDragOver={handleSeatDragOver}
                       onDrop={(e) => handleSeatDrop(e, cell.id)}
                       style={{
@@ -337,7 +335,7 @@ export function ResultPanel() {
             </div>
           </>
         ) : (
-          <Card withBorder radius="lg" bg="orange.0" p="xl" className="min-h-[320px] grid place-content-center text-center">
+          <Card withBorder radius="lg" p="xl" className="bg-surface-warm min-h-[320px] grid place-content-center text-center">
             <Stack align="center" gap="sm">
               <Text size="xs" fw={800} tt="uppercase" c="orange.6">Ready</Text>
               <Title order={3}>자리표가 아직 없습니다</Title>

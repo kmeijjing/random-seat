@@ -67,7 +67,7 @@ export function SeatConfigPanel() {
           ))}
         </Group>
 
-        <Card withBorder radius="md" bg="orange.0" p="sm">
+        <Card withBorder radius="md" className="bg-surface-warm" p="sm">
           <SimpleGrid cols={3}>
             <div>
               <Text size="xs" c="dimmed">사용 가능 좌석</Text>
