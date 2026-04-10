@@ -1,4 +1,4 @@
-import { Accordion, Button, Card, Checkbox, Group, Select, SimpleGrid, Stack, Text } from '@mantine/core'
+import { Accordion, Badge, Button, Card, Checkbox, Group, Select, SimpleGrid, Stack, Text } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { useMemo, useRef } from 'react'
 import { useShallow } from 'zustand/react/shallow'
@@ -134,6 +134,20 @@ export function AdvancedSettingsContent() {
               <Text size="xs" c="dimmed">
                 각 칸을 클릭하면 좌석 → 통로 → 비활성 순으로 바뀝니다.
               </Text>
+              <Stack gap={4}>
+                <Group gap="xs">
+                  <Badge color="orange" variant="light" size="sm">좌석</Badge>
+                  <Text size="xs" c="dimmed">학생이 배정되는 실제 자리</Text>
+                </Group>
+                <Group gap="xs">
+                  <Badge color="gray" variant="light" size="sm">통로</Badge>
+                  <Text size="xs" c="dimmed">자리 번호는 건너뛰고 배정 제외</Text>
+                </Group>
+                <Group gap="xs">
+                  <Badge color="red" variant="light" size="sm">비활성</Badge>
+                  <Text size="xs" c="dimmed">없는 셈 치고 배정 제외</Text>
+                </Group>
+              </Stack>
               <div
                 className="grid gap-1.5"
                 style={{ gridTemplateColumns: `repeat(${seatConfig.columns}, minmax(56px, 1fr))` }}
