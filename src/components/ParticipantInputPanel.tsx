@@ -46,8 +46,10 @@ export function ParticipantInputPanel() {
             <Title order={5} c="orange.7">
               1. 명단 입력
             </Title>
-            <Tooltip label="Tooltip 1">
-              <LiaInfoCircleSolid />
+            <Tooltip label="줄바꿈·쉼표·탭·세미콜론으로 구분해 입력할 수 있어요" withArrow multiline w={220}>
+              <span className="inline-flex cursor-help">
+                <LiaInfoCircleSolid />
+              </span>
             </Tooltip>
           </div>
           <Badge color="orange" variant="light">
