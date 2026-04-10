@@ -79,9 +79,9 @@ export type SeatStoreActions = {
   onToggleRedrawParticipant: (participantId: string) => void
   onSelectAllForRedraw: () => void
   onDeselectAllForRedraw: () => void
-  onSaveTemplate: () => void
+  onSaveTemplate: (name: string) => void
   onLoadTemplate: (template: SeatTemplate) => void
-  onRenameTemplate: (template: SeatTemplate) => void
+  onRenameTemplate: (template: SeatTemplate, nextName: string) => void
   onDeleteTemplate: (template: SeatTemplate) => void
   onLoadHistory: (entry: DrawHistoryEntry) => void
   onOpenTemplateDrawer: () => void
@@ -413,8 +413,6 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
         },
 
         onClearAllStorage: () => {
-          if (!browser.confirm('현재 초안, 템플릿, 이력을 모두 삭제할까요?')) return
-
           abortPendingDraw()
           const defaults = getDefaultState()
           set({
@@ -429,13 +427,14 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
             searchQuery: '',
             selectedParticipantsForRedraw: [],
             errorMessage: '',
-            statusMessage: '로컬 저장 데이터를 모두 지웠습니다.',
+            statusMessage: '',
             isDrawing: false,
             fixedParticipantId: '',
             fixedCellId: '',
             isRedrawPickerOpen: false,
           })
           clearSavedState()
+          browser.notify('success', '로컬 저장 데이터를 모두 지웠습니다.')
         },
 
         onCopyResult: async () => {
@@ -488,15 +487,15 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
 
         onDeselectAllForRedraw: () => set({ selectedParticipantsForRedraw: [] }),
 
-        onSaveTemplate: () => {
-          const name = browser.prompt('저장할 템플릿 ��름을 입력해 주세요.', '새 템플릿')
-          if (!name || !name.trim()) return
+        onSaveTemplate: (name) => {
+          const trimmed = name.trim()
+          if (!trimmed) return
 
           const state = get()
           const now = new Date().toISOString()
           const template: SeatTemplate = {
             id: crypto.randomUUID(),
-            name: name.trim(),
+            name: trimmed,
             participantInput: state.participantInput,
             seatConfig: cloneLayout(state.seatConfig),
             fixedSeats: structuredClone(state.fixedSeats),
@@ -506,14 +505,12 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
 
           set({
             templates: upsertTemplate(state.templates, template),
-            statusMessage: `"${template.name}" 템플릿을 저���했습니다.`,
             errorMessage: '',
           })
+          browser.notify('success', `"${template.name}" 템플릿을 저장했습니다.`)
         },
 
         onLoadTemplate: (template) => {
-          if (!browser.confirm(`"${template.name}" 템플릿을 현재 초안에 불러올까요?`)) return
-
           abortPendingDraw()
           set({
             participantInput: template.participantInput,
@@ -523,37 +520,33 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
             updatedAt: null,
             selectedParticipantsForRedraw: [],
             searchQuery: '',
-            statusMessage: `"${template.name}" 템플릿을 불러왔습니다.`,
             errorMessage: '',
             isTemplateDrawerOpen: false,
             isRedrawPickerOpen: false,
           })
+          browser.notify('success', `"${template.name}" 템플릿을 불러왔습니다.`)
         },
 
-        onRenameTemplate: (template) => {
-          const nextName = browser.prompt('새 템플릿 이름을 입력해 주세��.', template.name)
-          if (!nextName || !nextName.trim()) return
+        onRenameTemplate: (template, nextName) => {
+          const trimmed = nextName.trim()
+          if (!trimmed) return
 
           set((state) => ({
-            templates: renameTemplate(state.templates, template.id, nextName.trim()),
-            statusMessage: '템플릿 이름을 변경했��니다.',
+            templates: renameTemplate(state.templates, template.id, trimmed),
             errorMessage: '',
           }))
+          browser.notify('success', '템플릿 이름을 변경했습니다.')
         },
 
         onDeleteTemplate: (template) => {
-          if (!browser.confirm(`"${template.name}" ���플릿을 삭제할까요?`)) return
-
           set((state) => ({
             templates: deleteTemplate(state.templates, template.id),
-            statusMessage: '템플릿을 삭제했습���다.',
             errorMessage: '',
           }))
+          browser.notify('success', '템플릿을 삭제했습니다.')
         },
 
         onLoadHistory: (entry) => {
-          if (!browser.confirm('이 이력 상태를 현재 작업 화면에 불러올까요?')) return
-
           abortPendingDraw()
           set({
             participantInput: entry.participantsSnapshot.map((p) => p.name).join('\n'),
@@ -571,11 +564,11 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
             updatedAt: entry.timestamp,
             selectedParticipantsForRedraw: [],
             searchQuery: '',
-            statusMessage: '이력 결과를 현재 화면에 불러왔습니다.',
             errorMessage: '',
             isHistoryDrawerOpen: false,
             isRedrawPickerOpen: false,
           })
+          browser.notify('success', '이력 결과를 현재 화면에 불러왔습니다.')
         },
 
         onOpenTemplateDrawer: () =>

@@ -45,7 +45,14 @@ export function DrawerOverlay() {
           <Text size="sm" c="dimmed">
             현재 명단, 좌석 배치, 고정석 상태를 템플릿으로 저장할 수 있습니다.
           </Text>
-          <Button variant="gradient" gradient={{ from: "orange.6", to: "orange.3", deg: 135 }} onClick={onSaveTemplate}>
+          <Button
+            variant="gradient"
+            gradient={{ from: "orange.6", to: "orange.3", deg: 135 }}
+            onClick={() => {
+              const name = window.prompt('저장할 템플릿 이름을 입력해 주세요.', '새 템플릿')
+              if (name && name.trim()) onSaveTemplate(name)
+            }}
+          >
             현재 상태 저장
           </Button>
           <Stack gap="sm">
@@ -58,9 +65,39 @@ export function DrawerOverlay() {
                       <Text size="xs" c="dimmed">{template.participantInput ? '명단 포함' : '빈 템플릿'}</Text>
                     </div>
                     <Group gap="xs">
-                      <Button variant="subtle" size="xs" onClick={() => onLoadTemplate(template)}>불러오기</Button>
-                      <Button variant="subtle" size="xs" onClick={() => onRenameTemplate(template)}>이름 변경</Button>
-                      <Button variant="subtle" size="xs" color="red" onClick={() => onDeleteTemplate(template)}>삭제</Button>
+                      <Button
+                        variant="subtle"
+                        size="xs"
+                        onClick={() => {
+                          if (window.confirm(`"${template.name}" 템플릿을 현재 초안에 불러올까요?`)) {
+                            onLoadTemplate(template)
+                          }
+                        }}
+                      >
+                        불러오기
+                      </Button>
+                      <Button
+                        variant="subtle"
+                        size="xs"
+                        onClick={() => {
+                          const nextName = window.prompt('새 템플릿 이름을 입력해 주세요.', template.name)
+                          if (nextName && nextName.trim()) onRenameTemplate(template, nextName)
+                        }}
+                      >
+                        이름 변경
+                      </Button>
+                      <Button
+                        variant="subtle"
+                        size="xs"
+                        color="red"
+                        onClick={() => {
+                          if (window.confirm(`"${template.name}" 템플릿을 삭제할까요?`)) {
+                            onDeleteTemplate(template)
+                          }
+                        }}
+                      >
+                        삭제
+                      </Button>
                     </Group>
                   </Group>
                 </Card>
@@ -84,7 +121,17 @@ export function DrawerOverlay() {
                       <Text fw={600} size="sm">{formatTimestamp(entry.timestamp)}</Text>
                       <Text size="xs" c="dimmed">{formatHistoryOptions(entry.optionsUsed)}</Text>
                     </div>
-                    <Button variant="subtle" size="xs" onClick={() => onLoadHistory(entry)}>불러오기</Button>
+                    <Button
+                      variant="subtle"
+                      size="xs"
+                      onClick={() => {
+                        if (window.confirm('이 이력 상태를 현재 작업 화면에 불러올까요?')) {
+                          onLoadHistory(entry)
+                        }
+                      }}
+                    >
+                      불러오기
+                    </Button>
                   </Group>
                 </Card>
               ))

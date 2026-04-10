@@ -12,8 +12,6 @@ describe('seatStore', () => {
     vi.useFakeTimers()
 
     mockBrowser = {
-      confirm: vi.fn(() => true),
-      prompt: vi.fn(() => '저장 템플릿'),
       copyText: vi.fn().mockResolvedValue(undefined),
       print: vi.fn(),
       reload: vi.fn(),
@@ -21,6 +19,7 @@ describe('seatStore', () => {
         setTimeout(cb, ms) as unknown as number,
       ),
       clearTimer: vi.fn((id: number) => clearTimeout(id)),
+      notify: vi.fn(),
     }
 
     store = createSeatStore(mockBrowser)
@@ -81,9 +80,9 @@ describe('seatStore', () => {
     store.getState().onRunDraw('all')
     vi.advanceTimersByTime(700)
 
-    store.getState().onSaveTemplate()
+    store.getState().onSaveTemplate('저장 템플릿')
     expect(store.getState().templates).toHaveLength(1)
-    expect(mockBrowser.prompt).toHaveBeenCalled()
+    expect(mockBrowser.notify).toHaveBeenCalledWith('success', expect.stringContaining('저장 템플릿'))
 
     const historyEntry: DrawHistoryEntry = store.getState().history[0]
 
@@ -96,7 +95,6 @@ describe('seatStore', () => {
     expect(store.getState().assignments).toHaveLength(2)
 
     store.getState().onClearAllStorage()
-    expect(mockBrowser.confirm).toHaveBeenCalled()
     expect(store.getState().participantInput).toBe('')
     expect(store.getState().templates).toEqual([])
     expect(store.getState().history).toEqual([])

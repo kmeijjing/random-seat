@@ -153,7 +153,16 @@ export function AdvancedSettingsContent() {
         현재 좌석 {usableSeatCount}석, 통로/비활성은 필요할 때만 편집합니다.
       </Text>
 
-      <Button variant="subtle" color="red" size="xs" onClick={onClearAllStorage}>
+      <Button
+        variant="subtle"
+        color="red"
+        size="xs"
+        onClick={() => {
+          if (window.confirm('현재 초안, 템플릿, 이력을 모두 삭제할까요?')) {
+            onClearAllStorage()
+          }
+        }}
+      >
         전체 저장 삭제
       </Button>
     </Stack>
