@@ -1,5 +1,6 @@
-import { Badge, Button, Card, Checkbox, Group, Stack, Text, Title } from "@mantine/core";
+import { Badge, Button, Card, Checkbox, Group, Stack, Text, TextInput, Title } from "@mantine/core";
 import { useMemo } from "react";
+import { IoSearchOutline } from "react-icons/io5";
 import { useShallow } from "zustand/react/shallow";
 import { selectSeatNumberMap } from "../store/seatSelectors";
 import { useSeatStore } from "../store/seatStore";
@@ -7,7 +8,7 @@ import { formatTimestamp } from "../utils/format";
 
 export function ResultPanel() {
   const {
-    assignments, updatedAt, drawSettings, searchQuery,
+    assignments, updatedAt, drawSettings, searchQuery, onSearchQueryChange,
     onCopyResult, onPrint, isDrawing, onRunDraw, onToggleRedrawPicker,
     isRedrawPickerOpen, selectedParticipantsForRedraw, onToggleRedrawParticipant,
     onSelectAllForRedraw, onDeselectAllForRedraw, seatConfig, fixedSeats,
@@ -49,11 +50,23 @@ export function ResultPanel() {
   return (
     <Card shadow="sm" radius="lg" withBorder className="min-h-0 overflow-hidden grid grid-rows-[auto_1fr] print:block print:border-0 print:shadow-none">
       <Stack gap="sm">
-        <Group justify="space-between">
-          <Title order={5} c="orange.7">결과</Title>
-          <Badge color={hasAssignments ? "green" : "gray"} variant="light">
-            {hasAssignments ? `${assignments.length}명 배정` : "결과 대기"}
-          </Badge>
+        <Group justify="space-between" wrap="wrap" gap="xs">
+          <Group gap="xs">
+            <Title order={5} c="orange.7">결과</Title>
+            <Badge color={hasAssignments ? "green" : "gray"} variant="light">
+              {hasAssignments ? `${assignments.length}명 배정` : "결과 대기"}
+            </Badge>
+          </Group>
+          <TextInput
+            placeholder="학생 이름 검색"
+            value={searchQuery}
+            onChange={(e) => onSearchQueryChange(e.currentTarget.value)}
+            leftSection={<IoSearchOutline />}
+            size="xs"
+            disabled={!hasAssignments}
+            className="print:hidden"
+            style={{ flex: "0 1 220px" }}
+          />
         </Group>
 
         {hasAssignments ? (
