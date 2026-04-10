@@ -1,4 +1,5 @@
 import { Accordion, Button, Card, Checkbox, Group, Select, SimpleGrid, Stack, Text } from '@mantine/core'
+import { modals } from '@mantine/modals'
 import { useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { selectParticipants, selectSelectableSeatCells, selectUsableSeatCount } from '../store/seatSelectors'
@@ -157,11 +158,21 @@ export function AdvancedSettingsContent() {
         variant="subtle"
         color="red"
         size="xs"
-        onClick={() => {
-          if (window.confirm('현재 초안, 템플릿, 이력을 모두 삭제할까요?')) {
-            onClearAllStorage()
-          }
-        }}
+        onClick={() =>
+          modals.openConfirmModal({
+            title: '전체 저장 데이터 삭제',
+            children: (
+              <Text size="sm">
+                현재 초안과 저장된 모든 템플릿, 이력이 지워집니다.
+                <br />
+                이 동작은 되돌릴 수 없습니다.
+              </Text>
+            ),
+            labels: { confirm: '전부 삭제', cancel: '취소' },
+            confirmProps: { color: 'red' },
+            onConfirm: onClearAllStorage,
+          })
+        }
       >
         전체 저장 삭제
       </Button>
