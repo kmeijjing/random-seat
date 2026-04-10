@@ -1,6 +1,6 @@
-import { Badge, Button, Card, Checkbox, Group, Stack, Text, TextInput, Title } from "@mantine/core";
+import { Badge, Button, Card, Checkbox, Group, Stack, Text, TextInput, Title, Tooltip } from "@mantine/core";
 import { useMemo } from "react";
-import { IoSearchOutline } from "react-icons/io5";
+import { IoSearchOutline, IoShuffleOutline } from "react-icons/io5";
 import { useShallow } from "zustand/react/shallow";
 import { selectSeatNumberMap } from "../store/seatSelectors";
 import { useSeatStore } from "../store/seatStore";
@@ -86,9 +86,18 @@ export function ResultPanel() {
               <Button variant="light" color="gray" size="xs" onClick={() => onRunDraw("all")} disabled={isDrawing}>
                 전체 다시 뽑기
               </Button>
-              <Button variant="light" color="gray" size="xs" onClick={onToggleRedrawPicker} disabled={isDrawing || redrawCandidates.length === 0}>
-                일부만 다시 뽑기
-              </Button>
+              <Tooltip label="선택한 학생들만 다시 배정합니다 (고정석 제외)" withArrow>
+                <Button
+                  variant="light"
+                  color="gray"
+                  size="xs"
+                  leftSection={<IoShuffleOutline />}
+                  onClick={onToggleRedrawPicker}
+                  disabled={isDrawing || redrawCandidates.length === 0}
+                >
+                  일부만 다시 뽑기
+                </Button>
+              </Tooltip>
               <div className="ml-auto flex gap-2">
                 <Button variant="subtle" color="gray" size="xs" onClick={onCopyResult} disabled={!hasAssignments}>복사</Button>
                 <Button variant="subtle" color="gray" size="xs" onClick={onPrint} disabled={!hasAssignments}>인쇄</Button>
