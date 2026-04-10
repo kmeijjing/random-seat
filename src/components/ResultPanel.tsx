@@ -207,18 +207,28 @@ export function ResultPanel() {
 
             <div className="min-h-0 overflow-auto pr-1 print:overflow-visible print:pr-0">
               <div
+                key={updatedAt ?? "initial"}
                 className={`grid gap-2 min-w-max ${isDrawing ? "opacity-60" : ""}`}
                 style={{ gridTemplateColumns: `repeat(${seatConfig.columns}, minmax(118px, 1fr))` }}
               >
-                {seatConfig.layout.cells.map((cell) => {
+                {seatConfig.layout.cells.map((cell, index) => {
                   const assignment = assignmentMap.get(cell.id);
                   const isSearchMatch = matchingCellIds.has(cell.id);
                   const fixedSeat = fixedSeats.find((item) => item.cellId === cell.id);
                   const seatNumber = seatNumberMap.get(cell.id);
+                  const animationDelay = `${Math.min(index * 30, 900)}ms`;
 
                   if (cell.type !== "seat") {
                     return (
-                      <Card key={cell.id} withBorder radius="md" p="xs" bg="gray.1" style={{ borderStyle: "dashed", minHeight: 96 }}>
+                      <Card
+                        key={cell.id}
+                        withBorder
+                        radius="md"
+                        p="xs"
+                        bg="gray.1"
+                        className="seat-card-animate"
+                        style={{ borderStyle: "dashed", minHeight: 96, animationDelay }}
+                      >
                         <Text size="xs" fw={800} c="orange.7">{cell.label}</Text>
                         <Text fw={600} size="sm">{cell.type === "aisle" ? "통로" : "비활성"}</Text>
                         <Text size="xs" c="dimmed">배정 제외</Text>
@@ -233,8 +243,10 @@ export function ResultPanel() {
                       radius="md"
                       p="xs"
                       bg={assignment?.isFixed ? "orange.1" : "orange.0"}
+                      className="seat-card-animate"
                       style={{
                         minHeight: 96,
+                        animationDelay,
                         borderColor: assignment?.isFixed ? "var(--mantine-color-orange-3)" : isSearchMatch ? "var(--mantine-color-orange-4)" : undefined,
                         outline: isSearchMatch ? "3px solid var(--mantine-color-orange-2)" : undefined,
                       }}
