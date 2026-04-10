@@ -31,7 +31,7 @@ export function ResultPanel() {
   const matchingCellIds = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     return new Set(
-      assignments.filter((a) => query ? a.participant?.name.toLowerCase().includes(query) : false).map((a) => a.cellId),
+      assignments.filter((a) => query ? a.participant?.displayName.toLowerCase().includes(query) : false).map((a) => a.cellId),
     );
   }, [assignments, searchQuery]);
   const showNoSearchResults = useMemo(() => {
@@ -154,7 +154,7 @@ export function ResultPanel() {
                       }}
                     >
                       <Text size="xs" fw={800} c="orange.7">{cell.label}</Text>
-                      <Text fw={600} size="sm">{assignment?.participant?.name ?? "빈자리"}</Text>
+                      <Text fw={600} size="sm">{assignment?.participant?.displayName ?? "빈자리"}</Text>
                       <Text size="xs" c="dimmed">
                         {seatNumber}번 자리{fixedSeat ? " · 고정석" : ""}
                       </Text>

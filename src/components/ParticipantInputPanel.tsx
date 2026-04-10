@@ -85,7 +85,7 @@ export function ParticipantInputPanel() {
             {participants.length > 0 ? (
               participants.map((participant) => (
                 <Pill key={participant.id} size="md">
-                  {participant.name}
+                  {participant.displayName}
                 </Pill>
               ))
             ) : (

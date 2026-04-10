@@ -5,6 +5,7 @@ import { generateAssignments } from './seating'
 const participants: Participant[] = Array.from({ length: 6 }, (_, index) => ({
   id: `participant-${index + 1}`,
   name: `학생 ${index + 1}`,
+  displayName: `학생 ${index + 1}`,
 }))
 
 const baseOptions: DrawOptions = {

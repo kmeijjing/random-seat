@@ -9,16 +9,25 @@ export function parseParticipants(input: string): Participant[] {
     .map((value) => value.trim())
     .filter(Boolean)
 
-  const occurrenceCounter = new Map<string, number>()
+  // First pass: count total occurrences per name.
+  const totalCounter = new Map<string, number>()
+  names.forEach((name) => {
+    totalCounter.set(name, (totalCounter.get(name) ?? 0) + 1)
+  })
 
+  // Second pass: assign IDs and friendly displayName.
+  const occurrenceCounter = new Map<string, number>()
   return names.map((name) => {
     const occurrence = (occurrenceCounter.get(name) ?? 0) + 1
-
     occurrenceCounter.set(name, occurrence)
+
+    const hasDuplicates = (totalCounter.get(name) ?? 0) > 1
+    const displayName = hasDuplicates ? `${name} (${occurrence})` : name
 
     return {
       id: `${name}-${occurrence}`,
       name,
+      displayName,
     }
   })
 }

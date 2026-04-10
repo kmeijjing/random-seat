@@ -45,7 +45,7 @@ export function selectMatchingCellIds(state: SeatStoreState): Set<string> {
 
   return new Set(
     state.assignments
-      .filter((a) => query ? a.participant?.name.toLowerCase().includes(query) : false)
+      .filter((a) => query ? a.participant?.displayName.toLowerCase().includes(query) : false)
       .map((a) => a.cellId),
   )
 }

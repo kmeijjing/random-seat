@@ -15,6 +15,7 @@ describe('buildSeatTableText', () => {
         participant: {
           id: '김하나-0',
           name: '김하나',
+          displayName: '김하나',
         },
         isFixed: false,
         zone: {

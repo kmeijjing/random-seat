@@ -21,6 +21,16 @@ describe('parseParticipants', () => {
       '이셋',
     ])
   })
+
+  it('appends (N) suffix to displayName only when name appears more than once', () => {
+    const participants = parseParticipants('김하나\n김하나\n박둘')
+
+    expect(participants.map((p) => p.displayName)).toEqual([
+      '김하나 (1)',
+      '김하나 (2)',
+      '박둘',
+    ])
+  })
 })
 
 describe('findDuplicateNames', () => {

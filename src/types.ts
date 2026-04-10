@@ -1,6 +1,7 @@
 export type Participant = {
   id: string
   name: string
+  displayName: string
 }
 
 export type SeatCellType = 'seat' | 'aisle' | 'blocked'

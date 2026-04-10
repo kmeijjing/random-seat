@@ -250,7 +250,7 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
 
           const nextFixedSeat: FixedSeat = {
             participantId: participant.id,
-            participantName: participant.name,
+            participantName: participant.displayName,
             cellId: seatCell.id,
           }
 
@@ -266,7 +266,7 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
           })
           clearDraftAssignments()
           set({
-            statusMessage: `${participant.name} 학생을 ${seatCell.label}에 고정했습니다.`,
+            statusMessage: `${participant.displayName} 학생을 ${seatCell.label}에 고정했습니다.`,
             errorMessage: '',
           })
         },

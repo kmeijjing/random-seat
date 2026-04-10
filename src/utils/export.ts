@@ -11,7 +11,7 @@ export function buildSeatTableText(
     .map((cell) => {
       const assignment = assignmentMap.get(cell.id)
 
-      return `${cell.label}: ${assignment?.participant?.name ?? '빈자리'}`
+      return `${cell.label}: ${assignment?.participant?.displayName ?? '빈자리'}`
     })
     .join('\n')
 }

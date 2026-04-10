@@ -84,6 +84,7 @@ function normalizeParticipant(value: unknown): Participant | null {
   return {
     id: value.id,
     name: value.name,
+    displayName: typeof value.displayName === 'string' ? value.displayName : value.name,
   }
 }
 
