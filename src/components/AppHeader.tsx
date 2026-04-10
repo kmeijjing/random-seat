@@ -1,4 +1,4 @@
-import { ActionIcon, Badge, Button, Group, Title } from "@mantine/core";
+import { ActionIcon, Button, Group, Title, Tooltip } from "@mantine/core";
 import { IoSettingsOutline } from "react-icons/io5";
 import { useShallow } from "zustand/react/shallow";
 import { useSeatStore } from "../store/seatStore";
@@ -33,14 +33,16 @@ export function AppHeader() {
           <Button variant="outline" size="xs" onClick={onOpenHistoryDrawer}>
             이력 {history.length}
           </Button>
-          <ActionIcon
-            variant="white"
-            size="lg"
-            onClick={onOpenSettingsDrawer}
-            aria-label="설정"
-          >
-            <IoSettingsOutline size={20} />
-          </ActionIcon>
+          <Tooltip label="고급 설정 (배정 옵션, 고정석, 좌석 편집)" withArrow>
+            <ActionIcon
+              variant="white"
+              size="lg"
+              onClick={onOpenSettingsDrawer}
+              aria-label="고급 설정"
+            >
+              <IoSettingsOutline size={20} />
+            </ActionIcon>
+          </Tooltip>
         </Group>
       </Group>
     </header>
