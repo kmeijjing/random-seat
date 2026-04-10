@@ -43,14 +43,14 @@ export function ParticipantInputPanel() {
       <Stack gap="sm">
         <Group justify="space-between">
           <div>
-            <Title order={5} c="teal.7">
+            <Title order={5} c="orange.7">
               1. 명단 입력
             </Title>
             <Tooltip label="Tooltip 1">
               <LiaInfoCircleSolid />
             </Tooltip>
           </div>
-          <Badge color="amber" variant="light">
+          <Badge color="orange" variant="light">
             {participants.length}명
           </Badge>
         </Group>
@@ -59,7 +59,7 @@ export function ParticipantInputPanel() {
           value={participantInput}
           onChange={(event) => onParticipantInputChange(event.target.value)}
           placeholder={"예시\n김하나\n박둘\n이셋\n\n또는\n김하나,박둘,이셋"}
-          className="h-50"
+          styles={{ input: { height: 200 } }}
         />
 
         <Text size="xs" c="dimmed">
@@ -67,12 +67,12 @@ export function ParticipantInputPanel() {
         </Text>
 
         {duplicateNames.length > 0 && (
-          <Text size="xs" c="orange.7">
+          <Text size="xs" c="red.7">
             중복 이름 감지: {duplicateNames.join(", ")}
           </Text>
         )}
 
-        <Card withBorder radius="md" bg="amber.0" p="sm">
+        <Card withBorder radius="md" bg="orange.0" p="sm">
           <Group justify="space-between" mb="xs">
             <Text fw={700} size="sm">
               파싱 미리보기
