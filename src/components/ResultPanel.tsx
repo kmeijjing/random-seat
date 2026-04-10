@@ -1,4 +1,5 @@
 import { Badge, Button, Card, Checkbox, Divider, Group, Stack, Text, TextInput, Title, Tooltip } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { useMemo } from "react";
 import { IoBookmarkOutline, IoCopyOutline, IoPrintOutline, IoSearchOutline, IoShuffleOutline } from "react-icons/io5";
@@ -30,6 +31,16 @@ export function ResultPanel() {
       onSaveTemplate: s.onSaveTemplate,
     })),
   );
+
+  const isDesktop = useMediaQuery("(min-width: 1280px)");
+
+  const handleGoToInput = () => {
+    const el = document.getElementById("participant-input-textarea");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      (el as HTMLTextAreaElement).focus();
+    }
+  };
 
   const openSaveTemplateModal = () => {
     const modalId = "save-template-from-result";
@@ -245,8 +256,12 @@ export function ResultPanel() {
               <Text size="xs" fw={800} tt="uppercase" c="orange.6">Ready</Text>
               <Title order={3}>자리표가 아직 없습니다</Title>
               <Text c="dimmed">
-                왼쪽에서 명단을 입력하고 좌석만 확인한 뒤, <Text span fw={700}>자리 뽑기</Text>를 누르면 결과가 이 영역에 표시됩니다.
+                {isDesktop ? "왼쪽" : "위"} 패널에서 명단을 입력하고 좌석을 확인한 뒤,{" "}
+                <Text span fw={700}>자리 뽑기</Text>를 누르면 결과가 이 영역에 표시됩니다.
               </Text>
+              <Button variant="light" color="orange" onClick={handleGoToInput}>
+                명단 입력하러 가기
+              </Button>
             </Stack>
           </Card>
         )}

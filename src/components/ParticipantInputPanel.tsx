@@ -60,6 +60,7 @@ export function ParticipantInputPanel() {
         </Group>
 
         <Textarea
+          id="participant-input-textarea"
           value={participantInput}
           onChange={(event) => onParticipantInputChange(event.target.value)}
           placeholder={"예시\n김하나\n박둘\n이셋\n\n또는\n김하나,박둘,이셋"}
