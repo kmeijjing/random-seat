@@ -126,7 +126,7 @@ export function AdvancedSettingsContent() {
                     <Button
                       key={cell.id}
                       variant="light"
-                      color={cell.type === 'seat' ? 'blue' : cell.type === 'aisle' ? 'gray' : 'red'}
+                      color={cell.type === 'seat' ? 'orange' : cell.type === 'aisle' ? 'gray' : 'red'}
                       size="xs"
                       h="auto"
                       p={4}

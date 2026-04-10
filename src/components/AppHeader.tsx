@@ -21,7 +21,7 @@ export function AppHeader() {
   );
 
   return (
-    <header className="bg-white/30 backdrop-blur-md py-2.5 px-6 fixed top-0 left-0 right-0 z-50 border-b border-gray-200/50 print:hidden">
+    <header className="bg-orange-50/40 backdrop-blur-md py-2.5 px-6 fixed top-0 left-0 right-0 z-50 border-b border-orange-200/40 print:hidden">
       <Group justify="space-between">
         <Title order={3} fw={700}>
           Random Seat

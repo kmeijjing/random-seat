@@ -45,7 +45,7 @@ export function DrawerOverlay() {
           <Text size="sm" c="dimmed">
             현재 명단, 좌석 배치, 고정석 상태를 템플릿으로 저장할 수 있습니다.
           </Text>
-          <Button variant="gradient" gradient={{ from: "teal", to: "blue", deg: 135 }} onClick={onSaveTemplate}>
+          <Button variant="gradient" gradient={{ from: "orange.6", to: "orange.3", deg: 135 }} onClick={onSaveTemplate}>
             현재 상태 저장
           </Button>
           <Stack gap="sm">

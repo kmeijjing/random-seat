@@ -31,8 +31,8 @@ export function SeatConfigPanel() {
     <Card shadow="sm" radius="lg" withBorder>
       <Stack gap="sm">
         <Group justify="space-between">
-          <Title order={5} c="teal.7">2. 좌석 설정</Title>
-          <Badge color="amber" variant="light">{usableSeatCount}석</Badge>
+          <Title order={5} c="orange.7">2. 좌석 설정</Title>
+          <Badge color="orange" variant="light">{usableSeatCount}석</Badge>
         </Group>
 
         <SimpleGrid cols={2}>
@@ -57,7 +57,7 @@ export function SeatConfigPanel() {
             <Button
               key={rec.label}
               variant="light"
-              color="cyan"
+              color="orange"
               size="xs"
               onClick={() => onApplyRecommendation(rec.rows, rec.columns)}
             >
@@ -67,7 +67,7 @@ export function SeatConfigPanel() {
           ))}
         </Group>
 
-        <Card withBorder radius="md" bg="amber.0" p="sm">
+        <Card withBorder radius="md" bg="orange.0" p="sm">
           <SimpleGrid cols={3}>
             <div>
               <Text size="xs" c="dimmed">사용 가능 좌석</Text>

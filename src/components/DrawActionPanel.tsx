@@ -21,7 +21,7 @@ export function DrawActionPanel() {
     <Card shadow="sm" radius="lg" withBorder>
       <Stack gap="sm">
         <Group justify="space-between">
-          <Title order={5} c="teal.7">3. 자리 뽑기</Title>
+          <Title order={5} c="orange.7">3. 자리 뽑기</Title>
           <Badge color={hasAssignments ? "green" : "gray"} variant="light">
             {hasAssignments ? "결과 있음" : "대기 중"}
           </Badge>
@@ -34,7 +34,7 @@ export function DrawActionPanel() {
           fullWidth
           size="lg"
           variant="gradient"
-          gradient={{ from: "teal", to: "blue", deg: 135 }}
+          gradient={{ from: "orange.6", to: "orange.3", deg: 135 }}
           onClick={() => onRunDraw("all")}
           loading={isDrawing}
         >

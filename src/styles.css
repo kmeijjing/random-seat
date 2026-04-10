@@ -19,9 +19,9 @@
     min-width: 320px;
     min-height: 100vh;
     background:
-      radial-gradient(circle at top left, rgba(255, 217, 102, 0.32), transparent 24%),
-      radial-gradient(circle at right, rgba(56, 189, 248, 0.12), transparent 24%),
-      linear-gradient(160deg, #fafbfe 0%, #f4f7fb 58%, #eef3ff 100%);
+      radial-gradient(circle at top left, rgba(255, 200, 150, 0.30), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(255, 228, 196, 0.20), transparent 28%),
+      linear-gradient(160deg, #fffaf6 0%, #fff5ee 58%, #fff0e6 100%);
   }
 
   #root {

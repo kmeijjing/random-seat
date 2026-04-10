@@ -50,7 +50,7 @@ export function ResultPanel() {
     <Card shadow="sm" radius="lg" withBorder className="min-h-0 overflow-hidden grid grid-rows-[auto_1fr] print:block print:border-0 print:shadow-none">
       <Stack gap="sm">
         <Group justify="space-between">
-          <Title order={5} c="teal.7">결과</Title>
+          <Title order={5} c="orange.7">결과</Title>
           <Badge color={hasAssignments ? "green" : "gray"} variant="light">
             {hasAssignments ? `${assignments.length}명 배정` : "결과 대기"}
           </Badge>
@@ -58,7 +58,7 @@ export function ResultPanel() {
 
         {hasAssignments ? (
           <>
-            <Card withBorder radius="md" bg="gray.0" p="xs" className="print:hidden">
+            <Card withBorder radius="md" bg="orange.0" p="xs" className="print:hidden">
               <Group justify="space-between">
                 <Text size="xs" c="dimmed">마지막 결과: {updatedAtLabel}</Text>
                 <Text size="xs" c="dimmed">
@@ -83,7 +83,7 @@ export function ResultPanel() {
             </Group>
 
             {isRedrawPickerOpen && (
-              <Card withBorder radius="md" bg="amber.0" p="sm" className="print:hidden">
+              <Card withBorder radius="md" bg="orange.0" p="sm" className="print:hidden">
                 <Stack gap="sm">
                   <Group justify="space-between">
                     <Text fw={700} size="sm">다시 뽑을 학생 선택</Text>
@@ -106,7 +106,7 @@ export function ResultPanel() {
                   </Group>
                   <Button
                     variant="gradient"
-                    gradient={{ from: "teal", to: "blue", deg: 135 }}
+                    gradient={{ from: "orange.6", to: "orange.3", deg: 135 }}
                     size="sm"
                     onClick={() => onRunDraw("selected")}
                     disabled={isDrawing}
@@ -133,7 +133,7 @@ export function ResultPanel() {
                   if (cell.type !== "seat") {
                     return (
                       <Card key={cell.id} withBorder radius="md" p="xs" bg="gray.1" style={{ borderStyle: "dashed", minHeight: 96 }}>
-                        <Text size="xs" fw={800} c="teal.7">{cell.label}</Text>
+                        <Text size="xs" fw={800} c="orange.7">{cell.label}</Text>
                         <Text fw={600} size="sm">{cell.type === "aisle" ? "통로" : "비활성"}</Text>
                         <Text size="xs" c="dimmed">배정 제외</Text>
                       </Card>
@@ -146,14 +146,14 @@ export function ResultPanel() {
                       withBorder
                       radius="md"
                       p="xs"
-                      bg={assignment?.isFixed ? "amber.0" : "blue.0"}
+                      bg={assignment?.isFixed ? "orange.1" : "orange.0"}
                       style={{
                         minHeight: 96,
-                        borderColor: assignment?.isFixed ? "var(--mantine-color-amber-4)" : isSearchMatch ? "var(--mantine-color-blue-4)" : undefined,
-                        outline: isSearchMatch ? "3px solid var(--mantine-color-blue-2)" : undefined,
+                        borderColor: assignment?.isFixed ? "var(--mantine-color-orange-3)" : isSearchMatch ? "var(--mantine-color-orange-4)" : undefined,
+                        outline: isSearchMatch ? "3px solid var(--mantine-color-orange-2)" : undefined,
                       }}
                     >
-                      <Text size="xs" fw={800} c="teal.7">{cell.label}</Text>
+                      <Text size="xs" fw={800} c="orange.7">{cell.label}</Text>
                       <Text fw={600} size="sm">{assignment?.participant?.name ?? "빈자리"}</Text>
                       <Text size="xs" c="dimmed">
                         {seatNumber}번 자리{fixedSeat ? " · 고정석" : ""}
@@ -165,9 +165,9 @@ export function ResultPanel() {
             </div>
           </>
         ) : (
-          <Card withBorder radius="lg" bg="gray.0" p="xl" className="min-h-[320px] grid place-content-center text-center">
+          <Card withBorder radius="lg" bg="orange.0" p="xl" className="min-h-[320px] grid place-content-center text-center">
             <Stack align="center" gap="sm">
-              <Text size="xs" fw={800} tt="uppercase" c="amber.7">Ready</Text>
+              <Text size="xs" fw={800} tt="uppercase" c="orange.6">Ready</Text>
               <Title order={3}>자리표가 아직 없습니다</Title>
               <Text c="dimmed">
                 왼쪽에서 명단을 입력하고 좌석만 확인한 뒤, <Text span fw={700}>자리 뽑기</Text>를 누르면 결과가 이 영역에 표시됩니다.
