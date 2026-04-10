@@ -1,4 +1,5 @@
 import {
+  Alert,
   Badge,
   Card,
   Group,
@@ -10,13 +11,14 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { useMemo } from "react";
+import { IoWarningOutline } from "react-icons/io5";
+import { LiaInfoCircleSolid } from "react-icons/lia";
 import { useShallow } from "zustand/react/shallow";
 import {
   selectDuplicateNames,
   selectParticipants,
 } from "../store/seatSelectors";
 import { useSeatStore } from "../store/seatStore";
-import { LiaInfoCircleSolid } from "react-icons/lia";
 
 export function ParticipantInputPanel() {
   const { participantInput, onParticipantInputChange } = useSeatStore(
@@ -69,9 +71,19 @@ export function ParticipantInputPanel() {
         </Text>
 
         {duplicateNames.length > 0 && (
-          <Text size="xs" c="red.7">
-            중복 이름 감지: {duplicateNames.join(", ")}
-          </Text>
+          <Alert
+            color="yellow"
+            variant="light"
+            icon={<IoWarningOutline />}
+            title={`같은 이름 ${duplicateNames.length}개`}
+            p="xs"
+          >
+            <Text size="xs">
+              {duplicateNames.join(", ")}
+              <br />
+              동명이인으로 처리되어 "이름 (1)", "이름 (2)" 형태로 표시됩니다.
+            </Text>
+          </Alert>
         )}
 
         <Card withBorder radius="md" bg="orange.0" p="sm">
