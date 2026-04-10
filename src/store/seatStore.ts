@@ -61,7 +61,7 @@ export type SeatStoreActions = {
   onDimensionChange: (field: 'rows' | 'columns', value: string) => void
   onApplyRecommendation: (rows: number, columns: number) => void
   onCycleCellType: (cellId: string) => void
-  onAddFixedSeat: () => void
+  onAddFixedSeat: (explicit?: { participantId: string; cellId: string }) => void
   onRemoveFixedSeat: (participantId: string) => void
   onFixedParticipantChange: (value: string) => void
   onFixedCellChange: (value: string) => void
@@ -234,12 +234,14 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
           set({ statusMessage: '', errorMessage: '' })
         },
 
-        onAddFixedSeat: () => {
+        onAddFixedSeat: (explicit) => {
           const state = get()
           const participants = parseParticipants(state.participantInput)
           const participantMap = selectParticipantMap(participants)
-          const participant = participantMap.get(state.fixedParticipantId)
-          const seatCell = getCellById(state.seatConfig.layout, state.fixedCellId)
+          const participantId = explicit?.participantId ?? state.fixedParticipantId
+          const cellId = explicit?.cellId ?? state.fixedCellId
+          const participant = participantMap.get(participantId)
+          const seatCell = getCellById(state.seatConfig.layout, cellId)
 
           if (!participant || !seatCell || seatCell.type !== 'seat') {
             set({ errorMessage: '고정할 학생과 실제 좌석을 먼저 선택해 주세요.' })

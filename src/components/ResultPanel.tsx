@@ -15,7 +15,7 @@ export function ResultPanel() {
     onCopyResult, onPrint, isDrawing, onRunDraw, onToggleRedrawPicker,
     isRedrawPickerOpen, selectedParticipantsForRedraw, onToggleRedrawParticipant,
     onSelectAllForRedraw, onDeselectAllForRedraw, seatConfig, fixedSeats,
-    onSaveTemplate,
+    onSaveTemplate, onAddFixedSeat,
   } = useSeatStore(
     useShallow((s) => ({
       assignments: s.assignments, updatedAt: s.updatedAt, drawSettings: s.drawSettings,
@@ -29,8 +29,24 @@ export function ResultPanel() {
       onDeselectAllForRedraw: s.onDeselectAllForRedraw,
       seatConfig: s.seatConfig, fixedSeats: s.fixedSeats,
       onSaveTemplate: s.onSaveTemplate,
+      onAddFixedSeat: s.onAddFixedSeat,
     })),
   );
+
+  const handleSeatDrop = (e: React.DragEvent, cellId: string) => {
+    e.preventDefault();
+    const participantId = e.dataTransfer.getData("text/seat-participant-id");
+    if (participantId) {
+      onAddFixedSeat({ participantId, cellId });
+    }
+  };
+
+  const handleSeatDragOver = (e: React.DragEvent) => {
+    if (e.dataTransfer.types.includes("text/seat-participant-id")) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+    }
+  };
 
   const isDesktop = useMediaQuery("(min-width: 1280px)");
 
@@ -244,6 +260,8 @@ export function ResultPanel() {
                       p="xs"
                       bg={assignment?.isFixed ? "orange.1" : "orange.0"}
                       className="seat-card-animate"
+                      onDragOver={handleSeatDragOver}
+                      onDrop={(e) => handleSeatDrop(e, cell.id)}
                       style={{
                         minHeight: 96,
                         animationDelay,

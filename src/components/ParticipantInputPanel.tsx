@@ -99,7 +99,16 @@ export function ParticipantInputPanel() {
           <Group gap={6} style={{ maxHeight: 88, overflow: "auto" }}>
             {participants.length > 0 ? (
               participants.map((participant) => (
-                <Pill key={participant.id} size="md">
+                <Pill
+                  key={participant.id}
+                  size="md"
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('text/seat-participant-id', participant.id)
+                    e.dataTransfer.effectAllowed = 'copy'
+                  }}
+                  style={{ cursor: 'grab' }}
+                >
                   {participant.displayName}
                 </Pill>
               ))

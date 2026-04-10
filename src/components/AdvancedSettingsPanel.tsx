@@ -98,7 +98,7 @@ export function AdvancedSettingsContent() {
           <Button
             variant={bothSelected ? 'filled' : 'light'}
             size="xs"
-            onClick={onAddFixedSeat}
+            onClick={() => onAddFixedSeat()}
             disabled={!bothSelected}
           >
             고정석 저장
