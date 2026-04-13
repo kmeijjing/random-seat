@@ -1,11 +1,32 @@
-import { Alert, Badge, Button, Card, Group, NumberInput, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Group,
+  NumberInput,
+  SimpleGrid,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { getSeatCapacityFeedback, selectParticipants, selectRecommendedLayouts, selectUsableSeatCount } from "../store/seatSelectors";
+import {
+  getSeatCapacityFeedback,
+  selectParticipants,
+  selectRecommendedLayouts,
+  selectUsableSeatCount,
+} from "../store/seatSelectors";
 import { useSeatStore } from "../store/seatStore";
 
 export function SeatConfigPanel() {
-  const { seatConfig, participantInput, onDimensionChange, onApplyRecommendation } = useSeatStore(
+  const {
+    seatConfig,
+    participantInput,
+    onDimensionChange,
+    onApplyRecommendation,
+  } = useSeatStore(
     useShallow((s) => ({
       seatConfig: s.seatConfig,
       participantInput: s.participantInput,
@@ -15,11 +36,17 @@ export function SeatConfigPanel() {
   );
 
   const participants = useMemo(
-    () => selectParticipants({ participantInput } as Parameters<typeof selectParticipants>[0]),
+    () =>
+      selectParticipants({ participantInput } as Parameters<
+        typeof selectParticipants
+      >[0]),
     [participantInput],
   );
   const usableSeatCount = useMemo(
-    () => selectUsableSeatCount({ seatConfig } as Parameters<typeof selectUsableSeatCount>[0]),
+    () =>
+      selectUsableSeatCount({ seatConfig } as Parameters<
+        typeof selectUsableSeatCount
+      >[0]),
     [seatConfig],
   );
   const recommendedLayouts = useMemo(
@@ -32,11 +59,15 @@ export function SeatConfigPanel() {
   );
 
   return (
-    <Card shadow="sm" radius="lg" withBorder>
+    <Card radius="lg">
       <Stack gap="sm">
         <Group justify="space-between">
-          <Title order={5} c="orange.7">2. 좌석 설정</Title>
-          <Badge color="orange" variant="light">{usableSeatCount}석</Badge>
+          <Title order={5} c="orange.7">
+            2. 좌석 설정
+          </Title>
+          <Badge color="orange" variant="light">
+            {usableSeatCount}석
+          </Badge>
         </Group>
 
         <SimpleGrid cols={2}>
@@ -66,24 +97,34 @@ export function SeatConfigPanel() {
               onClick={() => onApplyRecommendation(rec.rows, rec.columns)}
             >
               {rec.label}
-              <Text span size="xs" c="dimmed" ml={4}>{rec.emptyCount}칸 여유</Text>
+              <Text span size="xs" c="dimmed" ml={4}>
+                {rec.emptyCount}칸 여유
+              </Text>
             </Button>
           ))}
         </Group>
 
-        <Card withBorder radius="md" className="bg-surface-warm" p="sm">
+        <Card radius="md" className="bg-surface-warm" p="sm">
           <SimpleGrid cols={3}>
             <div>
-              <Text size="xs" c="dimmed">사용 가능 좌석</Text>
+              <Text size="xs" c="dimmed">
+                사용 가능 좌석
+              </Text>
               <Text fw={600}>{usableSeatCount}석</Text>
             </div>
             <div>
-              <Text size="xs" c="dimmed">참여자</Text>
+              <Text size="xs" c="dimmed">
+                참여자
+              </Text>
               <Text fw={600}>{participants.length}명</Text>
             </div>
             <div>
-              <Text size="xs" c="dimmed">남는 좌석</Text>
-              <Text fw={600}>{Math.max(usableSeatCount - participants.length, 0)}석</Text>
+              <Text size="xs" c="dimmed">
+                남는 좌석
+              </Text>
+              <Text fw={600}>
+                {Math.max(usableSeatCount - participants.length, 0)}석
+              </Text>
             </div>
           </SimpleGrid>
           <Alert

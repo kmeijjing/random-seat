@@ -41,14 +41,19 @@ export function ParticipantInputPanel() {
   );
 
   return (
-    <Card shadow="sm" radius="lg" withBorder>
+    <Card radius="lg">
       <Stack gap="sm">
         <Group justify="space-between">
           <div>
             <Title order={5} c="orange.7">
               1. 명단 입력
             </Title>
-            <Tooltip label="줄바꿈·쉼표·탭·세미콜론으로 구분해 입력할 수 있어요" withArrow multiline w={220}>
+            <Tooltip
+              label="줄바꿈·쉼표·탭·세미콜론으로 구분해 입력할 수 있어요"
+              withArrow
+              multiline
+              w={220}
+            >
               <span className="inline-flex cursor-help">
                 <LiaInfoCircleSolid />
               </span>
@@ -87,7 +92,7 @@ export function ParticipantInputPanel() {
           </Alert>
         )}
 
-        <Card withBorder radius="md" className="bg-surface-warm" p="sm">
+        <Card radius="md" className="bg-surface-warm" p="sm">
           <Group justify="space-between" mb="xs">
             <Text fw={700} size="sm">
               파싱 미리보기
@@ -104,10 +109,13 @@ export function ParticipantInputPanel() {
                   size="md"
                   draggable
                   onDragStart={(e) => {
-                    e.dataTransfer.setData('text/seat-participant-id', participant.id)
-                    e.dataTransfer.effectAllowed = 'copy'
+                    e.dataTransfer.setData(
+                      "text/seat-participant-id",
+                      participant.id,
+                    );
+                    e.dataTransfer.effectAllowed = "copy";
                   }}
-                  style={{ cursor: 'grab' }}
+                  style={{ cursor: "grab" }}
                 >
                   {participant.displayName}
                 </Pill>

@@ -11,31 +11,35 @@ import {
   Text,
   Title,
   useMantineColorScheme,
-} from '@mantine/core'
-import { modals } from '@mantine/modals'
-import { useMemo, useRef } from 'react'
-import { IoKeypadOutline, IoMoonOutline, IoSunnyOutline } from 'react-icons/io5'
-import { useShallow } from 'zustand/react/shallow'
+} from "@mantine/core";
+import { modals } from "@mantine/modals";
+import { useMemo, useRef } from "react";
+import {
+  IoKeypadOutline,
+  IoMoonOutline,
+  IoSunnyOutline,
+} from "react-icons/io5";
+import { useShallow } from "zustand/react/shallow";
 import {
   selectParticipants,
   selectSelectableSeatCells,
   selectUsableSeatCount,
-} from '../store/seatSelectors'
-import { useSeatStore } from '../store/seatStore'
+} from "../store/seatSelectors";
+import { useSeatStore } from "../store/seatStore";
 
 type AdvancedSettingsPanelProps = {
-  onOpenShortcuts: () => void
-}
+  onOpenShortcuts: () => void;
+};
 
 type AdvancedSettingsContentProps = {
-  onOpenShortcuts: () => void
-}
+  onOpenShortcuts: () => void;
+};
 
 export function AdvancedSettingsPanel({
   onOpenShortcuts,
 }: AdvancedSettingsPanelProps) {
   return (
-    <Card shadow="sm" radius="lg" withBorder>
+    <Card radius="lg">
       <Accordion variant="contained">
         <Accordion.Item value="advanced-settings">
           <Accordion.Control>
@@ -59,14 +63,14 @@ export function AdvancedSettingsPanel({
         </Accordion.Item>
       </Accordion>
     </Card>
-  )
+  );
 }
 
 export function AdvancedSettingsContent({
   onOpenShortcuts,
 }: AdvancedSettingsContentProps) {
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme()
-  const isDark = colorScheme === 'dark'
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
   const {
     drawSettings,
     onAvoidPreviousSeatChange,
@@ -101,7 +105,7 @@ export function AdvancedSettingsContent({
       onCycleCellType: s.onCycleCellType,
       onClearAllStorage: s.onClearAllStorage,
     })),
-  )
+  );
 
   const participants = useMemo(
     () =>
@@ -109,28 +113,28 @@ export function AdvancedSettingsContent({
         typeof selectParticipants
       >[0]),
     [participantInput],
-  )
+  );
   const selectableSeatCells = useMemo(
     () =>
       selectSelectableSeatCells({ seatConfig } as Parameters<
         typeof selectSelectableSeatCells
       >[0]),
     [seatConfig],
-  )
+  );
   const usableSeatCount = useMemo(
     () =>
       selectUsableSeatCount({ seatConfig } as Parameters<
         typeof selectUsableSeatCount
       >[0]),
     [seatConfig],
-  )
+  );
 
   const sortedFixedSeats = fixedSeats
     .slice()
-    .sort((left, right) => left.cellId.localeCompare(right.cellId))
+    .sort((left, right) => left.cellId.localeCompare(right.cellId));
 
-  const cellSelectRef = useRef<HTMLInputElement>(null)
-  const bothSelected = Boolean(fixedParticipantId && fixedCellId)
+  const cellSelectRef = useRef<HTMLInputElement>(null);
+  const bothSelected = Boolean(fixedParticipantId && fixedCellId);
 
   return (
     <Stack gap="md">
@@ -192,9 +196,9 @@ export function AdvancedSettingsContent({
               placeholder="학생 선택"
               value={fixedParticipantId || null}
               onChange={(val) => {
-                onFixedParticipantChange(val ?? '')
+                onFixedParticipantChange(val ?? "");
                 if (val) {
-                  requestAnimationFrame(() => cellSelectRef.current?.focus())
+                  requestAnimationFrame(() => cellSelectRef.current?.focus());
                 }
               }}
               data={participants.map((p) => ({
@@ -209,7 +213,7 @@ export function AdvancedSettingsContent({
               label="좌석 선택"
               placeholder="좌석 선택"
               value={fixedCellId || null}
-              onChange={(val) => onFixedCellChange(val ?? '')}
+              onChange={(val) => onFixedCellChange(val ?? "")}
               data={selectableSeatCells.map((c) => ({
                 value: c.id,
                 label: c.label,
@@ -219,7 +223,7 @@ export function AdvancedSettingsContent({
             />
           </SimpleGrid>
           <Button
-            variant={bothSelected ? 'filled' : 'light'}
+            variant={bothSelected ? "filled" : "light"}
             size="xs"
             onClick={() => onAddFixedSeat()}
             disabled={!bothSelected}
@@ -227,11 +231,15 @@ export function AdvancedSettingsContent({
             고정석 저장
           </Button>
 
-          <Stack gap="xs" style={{ maxHeight: 150, overflow: 'auto' }}>
+          <Stack gap="xs" style={{ maxHeight: 150, overflow: "auto" }}>
             {sortedFixedSeats.length > 0 ? (
               sortedFixedSeats.map((fs) => (
                 <Card key={fs.participantId} withBorder radius="sm" p="xs">
-                  <Group justify="space-between" wrap="nowrap" align="flex-start">
+                  <Group
+                    justify="space-between"
+                    wrap="nowrap"
+                    align="flex-start"
+                  >
                     <div>
                       <Text fw={600} size="sm">
                         {fs.participantName}
@@ -307,32 +315,32 @@ export function AdvancedSettingsContent({
           >
             {seatConfig.layout.cells.map((cell) => {
               const nextType =
-                cell.type === 'seat'
-                  ? '통로'
-                  : cell.type === 'aisle'
-                    ? '비활성'
-                    : '좌석'
+                cell.type === "seat"
+                  ? "통로"
+                  : cell.type === "aisle"
+                    ? "비활성"
+                    : "좌석";
               return (
                 <Button
                   key={cell.id}
                   variant="light"
                   color={
-                    cell.type === 'seat'
-                      ? 'orange'
-                      : cell.type === 'aisle'
-                        ? 'gray'
-                        : 'red'
+                    cell.type === "seat"
+                      ? "orange"
+                      : cell.type === "aisle"
+                        ? "gray"
+                        : "red"
                   }
                   size="xs"
                   h="auto"
                   p={4}
                   onClick={() => onCycleCellType(cell.id)}
                   aria-label={`${cell.label} ${
-                    cell.type === 'seat'
-                      ? '좌석'
-                      : cell.type === 'aisle'
-                        ? '통로'
-                        : '비활성'
+                    cell.type === "seat"
+                      ? "좌석"
+                      : cell.type === "aisle"
+                        ? "통로"
+                        : "비활성"
                   }, 클릭하여 ${nextType}로 변경`}
                   style={{ minHeight: 56 }}
                 >
@@ -341,15 +349,15 @@ export function AdvancedSettingsContent({
                       {cell.label}
                     </Text>
                     <Text size="xs" c="dimmed">
-                      {cell.type === 'seat'
-                        ? '좌석'
-                        : cell.type === 'aisle'
-                          ? '통로'
-                          : '비활성'}
+                      {cell.type === "seat"
+                        ? "좌석"
+                        : cell.type === "aisle"
+                          ? "통로"
+                          : "비활성"}
                     </Text>
                   </Stack>
                 </Button>
-              )
+              );
             })}
           </div>
         </Stack>
@@ -366,8 +374,8 @@ export function AdvancedSettingsContent({
             </Text>
           </Group>
           <Text size="xs" c="dimmed">
-            현재 초안 초기화는 왼쪽 자리 뽑기 카드에서 처리하고, 아래 삭제는 저장된
-            전체 데이터를 지웁니다.
+            현재 초안 초기화는 왼쪽 자리 뽑기 카드에서 처리하고, 아래 삭제는
+            저장된 전체 데이터를 지웁니다.
           </Text>
           <Group gap="xs" wrap="wrap">
             <Button
@@ -375,11 +383,15 @@ export function AdvancedSettingsContent({
               color="gray"
               size="xs"
               leftSection={
-                isDark ? <IoSunnyOutline size={16} /> : <IoMoonOutline size={16} />
+                isDark ? (
+                  <IoSunnyOutline size={16} />
+                ) : (
+                  <IoMoonOutline size={16} />
+                )
               }
               onClick={toggleColorScheme}
             >
-              {isDark ? '라이트 모드' : '다크 모드'}
+              {isDark ? "라이트 모드" : "다크 모드"}
             </Button>
             <Button
               variant="light"
@@ -397,16 +409,15 @@ export function AdvancedSettingsContent({
             size="xs"
             onClick={() =>
               modals.openConfirmModal({
-                title: '전체 저장 데이터 삭제',
+                title: "전체 저장 데이터 삭제",
                 children: (
                   <Text size="sm">
                     현재 초안과 저장된 모든 템플릿, 이력이 지워집니다.
-                    <br />
-                    이 동작은 되돌릴 수 없습니다.
+                    <br />이 동작은 되돌릴 수 없습니다.
                   </Text>
                 ),
-                labels: { confirm: '전부 삭제', cancel: '취소' },
-                confirmProps: { color: 'red' },
+                labels: { confirm: "전부 삭제", cancel: "취소" },
+                confirmProps: { color: "red" },
                 onConfirm: onClearAllStorage,
               })
             }
@@ -416,5 +427,5 @@ export function AdvancedSettingsContent({
         </Stack>
       </Card>
     </Stack>
-  )
+  );
 }

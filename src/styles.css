@@ -18,7 +18,8 @@
   body {
     margin: 0;
     min-width: 320px;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
     background:
       radial-gradient(circle at top left, rgba(255, 200, 150, 0.30), transparent 28%),
       radial-gradient(circle at bottom right, rgba(255, 228, 196, 0.20), transparent 28%),
@@ -34,7 +35,8 @@
   }
 
   #root {
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
   }
 }
 
@@ -113,6 +115,13 @@
   :root,
   body {
     background: #fff;
+    height: auto;
+    overflow: visible;
+  }
+
+  #root {
+    height: auto;
+    overflow: visible;
   }
 
   .seat-card-animate {

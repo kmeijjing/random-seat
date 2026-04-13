@@ -86,7 +86,7 @@ export function DrawActionPanel() {
     });
 
   return (
-    <Card shadow="sm" radius="lg" withBorder>
+    <Card radius="lg">
       <Stack gap="sm">
         <Group justify="space-between">
           <Title order={5} c="orange.7">
@@ -109,7 +109,7 @@ export function DrawActionPanel() {
         )}
 
         {hasAssignments ? (
-          <Card withBorder radius="md" p="sm" className="bg-surface-warm">
+          <Card radius="md" p="sm" className="bg-surface-warm">
             <Stack gap={4}>
               <Text fw={700} size="sm">
                 결과가 준비되었습니다.
