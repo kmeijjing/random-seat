@@ -10,7 +10,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import './styles.css'
 
 const theme = createTheme({
-  primaryColor: 'orange',
+  primaryColor: 'blue',
   defaultRadius: 'lg',
   fontFamily: "'SUIT Variable', 'Pretendard Variable', 'Apple SD Gothic Neo', sans-serif",
   headings: {

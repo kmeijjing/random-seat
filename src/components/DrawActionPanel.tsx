@@ -1,4 +1,5 @@
 import {
+  Accordion,
   Badge,
   Button,
   Card,
@@ -86,70 +87,74 @@ export function DrawActionPanel() {
     });
 
   return (
-    <Card radius="lg">
-      <Stack gap="sm">
-        <Group justify="space-between">
-          <Title order={5} c="orange.7">
+    <Accordion.Item value={"자리 뽑기"}>
+      <Accordion.Control>
+        <Group>
+          <Title order={5} c="blue.7">
             3. 자리 뽑기
           </Title>
           <Badge color={hasAssignments ? "green" : "gray"} variant="light">
             {hasAssignments ? "결과 있음" : "대기 중"}
           </Badge>
         </Group>
+      </Accordion.Control>
+      <Accordion.Panel>
+        <Stack gap="sm">
+          {errorMessage && (
+            <Text size="sm" c="red.7">
+              {errorMessage}
+            </Text>
+          )}
+          {statusMessage && (
+            <Text size="sm" c="dimmed">
+              {statusMessage}
+            </Text>
+          )}
 
-        {errorMessage && (
-          <Text size="sm" c="red.7">
-            {errorMessage}
-          </Text>
-        )}
-        {statusMessage && (
-          <Text size="sm" c="dimmed">
-            {statusMessage}
-          </Text>
-        )}
-
-        {hasAssignments ? (
-          <Card radius="md" p="sm" className="bg-surface-warm">
-            <Stack gap={4}>
-              <Text fw={700} size="sm">
-                결과가 준비되었습니다.
-              </Text>
-              <Text size="xs" c="dimmed">
-                다시 뽑기와 결과 공유는 오른쪽 결과 패널에서 이어서 진행하세요.
-              </Text>
-            </Stack>
-          </Card>
-        ) : (
-          <Tooltip
-            label={disabledReason ?? ""}
-            disabled={canDraw}
-            withArrow
-            position="top"
-          >
-            <Button
-              fullWidth
-              size="lg"
-              variant="gradient"
-              gradient={{ from: "orange.6", to: "orange.3", deg: 135 }}
-              onClick={() => onRunDraw("all")}
-              loading={isDrawing}
-              disabled={!canDraw}
-              data-disabled={!canDraw || undefined}
+          {hasAssignments ? (
+            <Card radius="md" p="sm" className="bg-surface-warm">
+              <Stack gap={4}>
+                <Text fw={700} size="sm">
+                  결과가 준비되었습니다.
+                </Text>
+                <Text size="xs" c="dimmed">
+                  다시 뽑기와 결과 공유는 오른쪽 결과 패널에서 이어서
+                  진행하세요.
+                </Text>
+              </Stack>
+            </Card>
+          ) : (
+            <Tooltip
+              label={disabledReason ?? ""}
+              disabled={canDraw}
+              withArrow
+              position="top"
             >
-              {isDrawing ? "자리 뽑는 중..." : "자리 뽑기"}
-            </Button>
-          </Tooltip>
-        )}
+              <Button
+                fullWidth
+                size="lg"
+                variant="gradient"
+                gradient={{ from: "blue.6", to: "blue.3", deg: 135 }}
+                onClick={() => onRunDraw("all")}
+                loading={isDrawing}
+                disabled={!canDraw}
+                data-disabled={!canDraw || undefined}
+              >
+                {isDrawing ? "자리 뽑는 중..." : "자리 뽑기"}
+              </Button>
+            </Tooltip>
+          )}
 
-        <Button
-          variant="subtle"
-          color="gray"
-          size="xs"
-          onClick={handleResetClick}
-        >
-          현재 초안 초기화
-        </Button>
-      </Stack>
-    </Card>
+          <Button
+            variant="subtle"
+            color="gray"
+            size="xs"
+            onClick={handleResetClick}
+          >
+            현재 초안 초기화
+          </Button>
+        </Stack>
+      </Accordion.Panel>
+    </Accordion.Item>
   );
 }

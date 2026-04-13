@@ -10,6 +10,7 @@ import {
   TextInput,
   Title,
   Tooltip,
+  useMantineColorScheme,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
@@ -32,7 +33,11 @@ import { formatTimestamp } from "../utils/format";
 import { NameInputModalBody } from "./NameInputModalBody";
 import { PrintPreviewModalBody } from "./PrintPreviewModal";
 
-export function ResultPanel() {
+type ResultPanelProps = {
+  onOpenParticipantInput?: () => void;
+};
+
+export function ResultPanel({ onOpenParticipantInput }: ResultPanelProps) {
   const {
     assignments,
     updatedAt,
@@ -104,8 +109,14 @@ export function ResultPanel() {
 
   const isDesktop = useMediaQuery("(min-width: 1280px)");
   const [activeDropCellId, setActiveDropCellId] = useState<string | null>(null);
+  const { colorScheme } = useMantineColorScheme();
 
   const handleGoToInput = () => {
+    if (onOpenParticipantInput) {
+      onOpenParticipantInput();
+      return;
+    }
+
     const el = document.getElementById("participant-input-textarea");
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -123,7 +134,7 @@ export function ResultPanel() {
       const dataUrl = await toPng(gridRef.current, {
         cacheBust: true,
         pixelRatio: 2,
-        backgroundColor: "#fffaf6",
+        backgroundColor: colorScheme === "dark" ? "#181d27" : "#f8fbff",
         width: rect.width + PADDING * 2,
         height: rect.height + PADDING * 2,
         style: {
@@ -223,7 +234,7 @@ export function ResultPanel() {
       <Stack gap="sm">
         <Group justify="space-between" wrap="wrap" gap="xs">
           <Group gap="xs">
-            <Title order={5} c="orange.7">
+            <Title order={5} c="blue.7">
               결과
             </Title>
             <Badge color={hasAssignments ? "green" : "gray"} variant="light">
@@ -279,7 +290,7 @@ export function ResultPanel() {
               <Group gap="xs">
                 <Button
                   variant="gradient"
-                  gradient={{ from: "orange.6", to: "orange.3", deg: 135 }}
+                  gradient={{ from: "blue.6", to: "blue.3", deg: 135 }}
                   size="xs"
                   onClick={() => onRunDraw("all")}
                   disabled={isDrawing}
@@ -334,7 +345,7 @@ export function ResultPanel() {
                     인쇄
                   </Menu.Item>
                   <Menu.Item
-                    color="orange"
+                    color="blue"
                     leftSection={<IoBookmarkOutline size={16} />}
                     onClick={openSaveTemplateModal}
                   >
@@ -366,7 +377,7 @@ export function ResultPanel() {
                       >
                         전체 해제
                       </Button>
-                      <Badge color="orange" variant="light">
+                      <Badge variant="light">
                         {selectedParticipantsForRedraw.length}명 선택
                       </Badge>
                     </Group>
@@ -391,7 +402,7 @@ export function ResultPanel() {
                   </Group>
                   <Button
                     variant="gradient"
-                    gradient={{ from: "orange.6", to: "orange.3", deg: 135 }}
+                    gradient={{ from: "blue.6", to: "blue.3", deg: 135 }}
                     size="sm"
                     onClick={() => onRunDraw("selected")}
                     disabled={
@@ -447,7 +458,7 @@ export function ResultPanel() {
                           animationDelay,
                         }}
                       >
-                        <Text size="xs" fw={800} c="orange.7">
+                        <Text size="xs" fw={800} c="blue.7">
                           {cell.label}
                         </Text>
                         <Text fw={600} size="sm">
@@ -480,16 +491,16 @@ export function ResultPanel() {
                         minHeight: 96,
                         animationDelay,
                         borderColor: assignment?.isFixed
-                          ? "var(--mantine-color-orange-3)"
+                          ? "var(--mantine-color-blue-3)"
                           : isDropActive
-                            ? "var(--mantine-color-orange-5)"
+                            ? "var(--mantine-color-blue-5)"
                             : isSearchMatch
-                              ? "var(--mantine-color-orange-4)"
+                              ? "var(--mantine-color-blue-4)"
                               : undefined,
                         outline: isDropActive
-                          ? "3px solid var(--mantine-color-orange-3)"
+                          ? "3px solid var(--mantine-color-blue-3)"
                           : isSearchMatch
-                            ? "3px solid var(--mantine-color-orange-2)"
+                            ? "3px solid var(--mantine-color-blue-2)"
                             : undefined,
                       }}
                     >
@@ -498,7 +509,7 @@ export function ResultPanel() {
                         fw={800}
                         c={
                           hasParticipant || assignment?.isFixed
-                            ? "orange.7"
+                            ? "blue.7"
                             : "gray.6"
                         }
                       >
@@ -530,7 +541,7 @@ export function ResultPanel() {
             className="bg-surface-warm min-h-[320px] grid place-content-center text-center"
           >
             <Stack align="center" gap="sm">
-              <Text size="xs" fw={800} tt="uppercase" c="orange.6">
+              <Text size="xs" fw={800} tt="uppercase" c="blue.6">
                 Ready
               </Text>
               <Title order={3}>자리표가 아직 없습니다</Title>
@@ -542,7 +553,7 @@ export function ResultPanel() {
                 </Text>
                 를 누르면 결과가 이 영역에 표시됩니다.
               </Text>
-              <Button variant="light" color="orange" onClick={handleGoToInput}>
+              <Button variant="light" onClick={handleGoToInput}>
                 명단 입력하러 가기
               </Button>
             </Stack>

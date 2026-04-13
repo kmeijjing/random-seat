@@ -128,7 +128,7 @@ export function DrawerOverlay() {
           </Text>
           <Button
             variant="gradient"
-            gradient={{ from: "orange.6", to: "orange.3", deg: 135 }}
+            gradient={{ from: "blue.6", to: "blue.3", deg: 135 }}
             onClick={openSaveTemplateModal}
           >
             현재 상태 저장

@@ -39,30 +39,18 @@ export function AdvancedSettingsPanel({
   onOpenShortcuts,
 }: AdvancedSettingsPanelProps) {
   return (
-    <Card radius="lg">
-      <Accordion variant="contained">
-        <Accordion.Item value="advanced-settings">
-          <Accordion.Control>
-            <Group justify="space-between" wrap="nowrap" pr="sm">
-              <div>
-                <Title order={5} c="orange.7">
-                  4. 고급 설정
-                </Title>
-                <Text size="xs" c="dimmed">
-                  고정석, 배정 옵션, 좌석 편집, 앱 도구
-                </Text>
-              </div>
-              <Badge color="gray" variant="light">
-                선택
-              </Badge>
-            </Group>
-          </Accordion.Control>
-          <Accordion.Panel>
-            <AdvancedSettingsContent onOpenShortcuts={onOpenShortcuts} />
-          </Accordion.Panel>
-        </Accordion.Item>
-      </Accordion>
-    </Card>
+    <Accordion.Item value="고급 설정">
+      <Accordion.Control>
+        <Group>
+          <Title order={5} c="blue.7">
+            고급 설정
+          </Title>
+        </Group>
+      </Accordion.Control>
+      <Accordion.Panel>
+        <AdvancedSettingsContent onOpenShortcuts={onOpenShortcuts} />
+      </Accordion.Panel>
+    </Accordion.Item>
   );
 }
 
@@ -283,7 +271,7 @@ export function AdvancedSettingsContent({
           </Text>
           <Stack gap={4}>
             <Group gap="xs">
-              <Badge color="orange" variant="light" size="sm">
+              <Badge variant="light" size="sm">
                 좌석
               </Badge>
               <Text size="xs" c="dimmed">
@@ -326,7 +314,7 @@ export function AdvancedSettingsContent({
                   variant="light"
                   color={
                     cell.type === "seat"
-                      ? "orange"
+                      ? "blue"
                       : cell.type === "aisle"
                         ? "gray"
                         : "red"

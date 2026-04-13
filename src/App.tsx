@@ -1,6 +1,6 @@
 import { useHotkeys } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AdvancedSettingsPanel } from "./components/AdvancedSettingsPanel";
 import { AppHeader } from "./components/AppHeader";
 import { DrawerOverlay } from "./components/DrawerOverlay";
@@ -15,8 +15,15 @@ import {
   selectUsableSeatCount,
 } from "./store/seatSelectors";
 import { useSeatStore } from "./store/seatStore";
+import { Accordion, Card } from "@mantine/core";
 
 function App() {
+  const [openSections, setOpenSections] = useState<string[]>([
+    "명단 입력",
+    "좌석 설정",
+    "자리 뽑기",
+  ]);
+
   useEffect(() => {
     return () => useSeatStore.getState()._clearDrawTimer();
   }, []);
@@ -62,6 +69,19 @@ function App() {
     });
   };
 
+  const openParticipantInput = () => {
+    setOpenSections((current) =>
+      current.includes("명단 입력") ? current : [...current, "명단 입력"],
+    );
+
+    window.setTimeout(() => {
+      const input = document.getElementById("participant-input-textarea");
+      if (!input) return;
+      input.scrollIntoView({ behavior: "smooth", block: "center" });
+      (input as HTMLTextAreaElement).focus();
+    }, 180);
+  };
+
   useHotkeys([
     ["mod+Enter", runDrawIfPossible],
     ["mod+K", focusSearchInput],
@@ -70,19 +90,29 @@ function App() {
   ]);
 
   return (
-    <div className="mx-auto grid h-screen overflow-hidden w-[min(1520px,calc(100%-28px))] grid-rows-[auto_1fr] antialiased max-[900px]:w-[min(calc(100%-20px),1520px)] pt-14 print:block print:h-auto print:min-h-auto print:w-full print:bg-white print:p-0 pb-4">
+    <div className="mx-auto grid h-screen antialiased pt-14">
       <AppHeader />
 
-      <main className="grid min-h-0 h-full items-start overflow-y-auto overflow-x-hidden gap-3 grid-cols-[minmax(360px,430px)_minmax(0,1fr)] print:block print:h-auto print:min-h-auto print:w-full print:gap-0">
-        <aside className="grid min-h-0 auto-rows-max gap-3 print:hidden pt-4">
-          <ParticipantInputPanel />
-          <SeatConfigPanel />
-          <DrawActionPanel />
-          <AdvancedSettingsPanel onOpenShortcuts={openShortcutsModal} />
+      <main className="px-4 grid min-h-0 h-full items-start overflow-y-auto overflow-x-hidden gap-3 grid-cols-[minmax(360px,430px)_minmax(0,1fr)] print:block print:h-auto print:min-h-auto print:w-full print:gap-0">
+        <aside className="grid min-h-0 auto-rows-max gap-3 print:hidden py-4">
+          <Card radius="lg">
+            <Accordion
+              variant="separated"
+              order={4}
+              multiple
+              value={openSections}
+              onChange={setOpenSections}
+            >
+              <ParticipantInputPanel />
+              <SeatConfigPanel />
+              <DrawActionPanel />
+              <AdvancedSettingsPanel onOpenShortcuts={openShortcutsModal} />
+            </Accordion>
+          </Card>
         </aside>
 
         <div className="sticky top-0 self-start max-[900px]:static pt-4">
-          <ResultPanel />
+          <ResultPanel onOpenParticipantInput={openParticipantInput} />
         </div>
       </main>
 
