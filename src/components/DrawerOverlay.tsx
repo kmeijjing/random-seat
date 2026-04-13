@@ -4,19 +4,17 @@ import { useShallow } from 'zustand/react/shallow'
 import type { SeatTemplate } from '../types'
 import { useSeatStore } from '../store/seatStore'
 import { formatHistoryOptions, formatTimestamp } from '../utils/format'
-import { AdvancedSettingsContent } from './AdvancedSettingsPanel'
 import { NameInputModalBody } from './NameInputModalBody'
 
 export function DrawerOverlay() {
   const {
-    isTemplateDrawerOpen, isHistoryDrawerOpen, isSettingsDrawerOpen,
+    isTemplateDrawerOpen, isHistoryDrawerOpen,
     templates, history, onCloseDrawers, onSaveTemplate, onLoadTemplate,
     onRenameTemplate, onDeleteTemplate, onLoadHistory,
   } = useSeatStore(
     useShallow((s) => ({
       isTemplateDrawerOpen: s.isTemplateDrawerOpen,
       isHistoryDrawerOpen: s.isHistoryDrawerOpen,
-      isSettingsDrawerOpen: s.isSettingsDrawerOpen,
       templates: s.templates,
       history: s.history,
       onCloseDrawers: s.onCloseDrawers,
@@ -28,8 +26,8 @@ export function DrawerOverlay() {
     })),
   )
 
-  const opened = isTemplateDrawerOpen || isHistoryDrawerOpen || isSettingsDrawerOpen
-  const drawerTitle = isSettingsDrawerOpen ? '고급 설정' : isTemplateDrawerOpen ? '저장된 템플릿' : '최근 이력'
+  const opened = isTemplateDrawerOpen || isHistoryDrawerOpen
+  const drawerTitle = isTemplateDrawerOpen ? '저장된 템플릿' : '최근 이력'
 
   const openSaveTemplateModal = () => {
     const modalId = 'save-template'
@@ -123,9 +121,7 @@ export function DrawerOverlay() {
       returnFocus
       className="print:hidden"
     >
-      {isSettingsDrawerOpen ? (
-        <AdvancedSettingsContent />
-      ) : isTemplateDrawerOpen ? (
+      {isTemplateDrawerOpen ? (
         <Stack gap="md">
           <Text size="sm" c="dimmed">
             현재 명단, 좌석 배치, 고정석 상태를 템플릿으로 저장할 수 있습니다.

@@ -89,9 +89,14 @@ export function ParticipantInputPanel() {
 
         <Card withBorder radius="md" className="bg-surface-warm" p="sm">
           <Group justify="space-between" mb="xs">
-            <Text fw={700} size="sm">
-              파싱 미리보기
-            </Text>
+            <div>
+              <Text fw={700} size="sm">
+                파싱 미리보기
+              </Text>
+              <Text size="xs" c="dimmed">
+                결과가 나온 뒤 학생을 좌석으로 드래그하면 고정석으로 저장됩니다.
+              </Text>
+            </div>
             <Text size="xs" c="dimmed">
               {participants.length}명
             </Text>

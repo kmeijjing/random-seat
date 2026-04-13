@@ -103,25 +103,38 @@ export function DrawActionPanel() {
           </Text>
         )}
 
-        <Tooltip
-          label={disabledReason ?? ""}
-          disabled={canDraw}
-          withArrow
-          position="top"
-        >
-          <Button
-            fullWidth
-            size="lg"
-            variant="gradient"
-            gradient={{ from: "orange.6", to: "orange.3", deg: 135 }}
-            onClick={() => onRunDraw("all")}
-            loading={isDrawing}
-            disabled={!canDraw}
-            data-disabled={!canDraw || undefined}
+        {hasAssignments ? (
+          <Card withBorder radius="md" p="sm" className="bg-surface-warm">
+            <Stack gap={4}>
+              <Text fw={700} size="sm">
+                결과가 준비되었습니다.
+              </Text>
+              <Text size="xs" c="dimmed">
+                다시 뽑기와 결과 공유는 오른쪽 결과 패널에서 이어서 진행하세요.
+              </Text>
+            </Stack>
+          </Card>
+        ) : (
+          <Tooltip
+            label={disabledReason ?? ""}
+            disabled={canDraw}
+            withArrow
+            position="top"
           >
-            {isDrawing ? "자리 뽑는 중..." : "자리 뽑기"}
-          </Button>
-        </Tooltip>
+            <Button
+              fullWidth
+              size="lg"
+              variant="gradient"
+              gradient={{ from: "orange.6", to: "orange.3", deg: 135 }}
+              onClick={() => onRunDraw("all")}
+              loading={isDrawing}
+              disabled={!canDraw}
+              data-disabled={!canDraw || undefined}
+            >
+              {isDrawing ? "자리 뽑는 중..." : "자리 뽑기"}
+            </Button>
+          </Tooltip>
+        )}
 
         <Button
           variant="subtle"

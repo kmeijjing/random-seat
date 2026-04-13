@@ -1,16 +1,88 @@
-import { Accordion, Badge, Button, Card, Checkbox, Group, Select, SimpleGrid, Stack, Text } from '@mantine/core'
+import {
+  Accordion,
+  Badge,
+  Button,
+  Card,
+  Checkbox,
+  Group,
+  Select,
+  SimpleGrid,
+  Stack,
+  Text,
+  Title,
+  useMantineColorScheme,
+} from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { useMemo, useRef } from 'react'
+import { IoKeypadOutline, IoMoonOutline, IoSunnyOutline } from 'react-icons/io5'
 import { useShallow } from 'zustand/react/shallow'
-import { selectParticipants, selectSelectableSeatCells, selectUsableSeatCount } from '../store/seatSelectors'
+import {
+  selectParticipants,
+  selectSelectableSeatCells,
+  selectUsableSeatCount,
+} from '../store/seatSelectors'
 import { useSeatStore } from '../store/seatStore'
 
-export function AdvancedSettingsContent() {
+type AdvancedSettingsPanelProps = {
+  onOpenShortcuts: () => void
+}
+
+type AdvancedSettingsContentProps = {
+  onOpenShortcuts: () => void
+}
+
+export function AdvancedSettingsPanel({
+  onOpenShortcuts,
+}: AdvancedSettingsPanelProps) {
+  return (
+    <Card shadow="sm" radius="lg" withBorder>
+      <Accordion variant="contained">
+        <Accordion.Item value="advanced-settings">
+          <Accordion.Control>
+            <Group justify="space-between" wrap="nowrap" pr="sm">
+              <div>
+                <Title order={5} c="orange.7">
+                  4. 고급 설정
+                </Title>
+                <Text size="xs" c="dimmed">
+                  고정석, 배정 옵션, 좌석 편집, 앱 도구
+                </Text>
+              </div>
+              <Badge color="gray" variant="light">
+                선택
+              </Badge>
+            </Group>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <AdvancedSettingsContent onOpenShortcuts={onOpenShortcuts} />
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+    </Card>
+  )
+}
+
+export function AdvancedSettingsContent({
+  onOpenShortcuts,
+}: AdvancedSettingsContentProps) {
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme()
+  const isDark = colorScheme === 'dark'
   const {
-    drawSettings, onAvoidPreviousSeatChange, onBalanceZonesChange, onContinuousNumberingChange,
-    fixedSeats, fixedParticipantId, fixedCellId, participantInput, seatConfig,
-    onFixedParticipantChange, onFixedCellChange, onAddFixedSeat, onRemoveFixedSeat,
-    onCycleCellType, onClearAllStorage,
+    drawSettings,
+    onAvoidPreviousSeatChange,
+    onBalanceZonesChange,
+    onContinuousNumberingChange,
+    fixedSeats,
+    fixedParticipantId,
+    fixedCellId,
+    participantInput,
+    seatConfig,
+    onFixedParticipantChange,
+    onFixedCellChange,
+    onAddFixedSeat,
+    onRemoveFixedSeat,
+    onCycleCellType,
+    onClearAllStorage,
   } = useSeatStore(
     useShallow((s) => ({
       drawSettings: s.drawSettings,
@@ -31,11 +103,31 @@ export function AdvancedSettingsContent() {
     })),
   )
 
-  const participants = useMemo(() => selectParticipants({ participantInput } as Parameters<typeof selectParticipants>[0]), [participantInput])
-  const selectableSeatCells = useMemo(() => selectSelectableSeatCells({ seatConfig } as Parameters<typeof selectSelectableSeatCells>[0]), [seatConfig])
-  const usableSeatCount = useMemo(() => selectUsableSeatCount({ seatConfig } as Parameters<typeof selectUsableSeatCount>[0]), [seatConfig])
+  const participants = useMemo(
+    () =>
+      selectParticipants({ participantInput } as Parameters<
+        typeof selectParticipants
+      >[0]),
+    [participantInput],
+  )
+  const selectableSeatCells = useMemo(
+    () =>
+      selectSelectableSeatCells({ seatConfig } as Parameters<
+        typeof selectSelectableSeatCells
+      >[0]),
+    [seatConfig],
+  )
+  const usableSeatCount = useMemo(
+    () =>
+      selectUsableSeatCount({ seatConfig } as Parameters<
+        typeof selectUsableSeatCount
+      >[0]),
+    [seatConfig],
+  )
 
-  const sortedFixedSeats = fixedSeats.slice().sort((left, right) => left.cellId.localeCompare(right.cellId))
+  const sortedFixedSeats = fixedSeats
+    .slice()
+    .sort((left, right) => left.cellId.localeCompare(right.cellId))
 
   const cellSelectRef = useRef<HTMLInputElement>(null)
   const bothSelected = Boolean(fixedParticipantId && fixedCellId)
@@ -45,26 +137,36 @@ export function AdvancedSettingsContent() {
       <Card withBorder radius="md" p="sm">
         <Stack gap="sm">
           <Group justify="space-between">
-            <Text fw={700} size="sm">배정 옵션</Text>
-            <Text size="xs" c="dimmed">필요할 때만 사용</Text>
+            <Text fw={700} size="sm">
+              배정 옵션
+            </Text>
+            <Text size="xs" c="dimmed">
+              필요할 때만 사용
+            </Text>
           </Group>
           <Checkbox
             label="지난 자리 피하기"
             checked={drawSettings.avoidPreviousSeat}
-            onChange={(event) => onAvoidPreviousSeatChange(event.currentTarget.checked)}
+            onChange={(event) =>
+              onAvoidPreviousSeatChange(event.currentTarget.checked)
+            }
             size="sm"
           />
           <Checkbox
             label="자리 편중 줄이기"
             checked={drawSettings.balanceZones}
-            onChange={(event) => onBalanceZonesChange(event.currentTarget.checked)}
+            onChange={(event) =>
+              onBalanceZonesChange(event.currentTarget.checked)
+            }
             size="sm"
           />
           <Checkbox
             label="연속 좌석 번호 표시 (통로·비활성 건너뛰기)"
-            description="켜면 좌석 카드에 1번, 2번… 순서로 표시, 끄면 행-열 좌표로 표시합니다."
+            description="켜면 좌석 카드에 1번, 2번 순서로 표시하고, 끄면 행-열 좌표를 보여줍니다."
             checked={drawSettings.continuousNumbering}
-            onChange={(event) => onContinuousNumberingChange(event.currentTarget.checked)}
+            onChange={(event) =>
+              onContinuousNumberingChange(event.currentTarget.checked)
+            }
             size="sm"
           />
         </Stack>
@@ -73,10 +175,18 @@ export function AdvancedSettingsContent() {
       <Card withBorder radius="md" p="sm">
         <Stack gap="sm">
           <Group justify="space-between">
-            <Text fw={700} size="sm">고정석 지정</Text>
-            <Text size="xs" c="dimmed">{fixedSeats.length}건</Text>
+            <Text fw={700} size="sm">
+              고정석 지정
+            </Text>
+            <Text size="xs" c="dimmed">
+              {fixedSeats.length}건
+            </Text>
           </Group>
-          <SimpleGrid cols={2}>
+          <Text size="xs" c="dimmed">
+            학생과 좌석을 직접 고르거나, 결과가 나온 뒤 학생 이름을 좌석으로
+            드래그해 바로 고정할 수 있습니다.
+          </Text>
+          <SimpleGrid cols={{ base: 1, sm: 2 }}>
             <Select
               label="학생 선택"
               placeholder="학생 선택"
@@ -84,11 +194,13 @@ export function AdvancedSettingsContent() {
               onChange={(val) => {
                 onFixedParticipantChange(val ?? '')
                 if (val) {
-                  // 학생 선택 직후 좌석 드롭다운으로 포커스 이동
                   requestAnimationFrame(() => cellSelectRef.current?.focus())
                 }
               }}
-              data={participants.map((p) => ({ value: p.id, label: p.displayName }))}
+              data={participants.map((p) => ({
+                value: p.id,
+                label: p.displayName,
+              }))}
               size="sm"
               clearable
             />
@@ -98,7 +210,10 @@ export function AdvancedSettingsContent() {
               placeholder="좌석 선택"
               value={fixedCellId || null}
               onChange={(val) => onFixedCellChange(val ?? '')}
-              data={selectableSeatCells.map((c) => ({ value: c.id, label: c.label }))}
+              data={selectableSeatCells.map((c) => ({
+                value: c.id,
+                label: c.label,
+              }))}
               size="sm"
               clearable
             />
@@ -116,105 +231,190 @@ export function AdvancedSettingsContent() {
             {sortedFixedSeats.length > 0 ? (
               sortedFixedSeats.map((fs) => (
                 <Card key={fs.participantId} withBorder radius="sm" p="xs">
-                  <Group justify="space-between">
+                  <Group justify="space-between" wrap="nowrap" align="flex-start">
                     <div>
-                      <Text fw={600} size="sm">{fs.participantName}</Text>
-                      <Text size="xs" c="dimmed">{fs.cellId} 고정</Text>
+                      <Text fw={600} size="sm">
+                        {fs.participantName}
+                      </Text>
+                      <Text size="xs" c="dimmed">
+                        {fs.cellId} 고정
+                      </Text>
                     </div>
-                    <Button variant="subtle" size="xs" color="red" onClick={() => onRemoveFixedSeat(fs.participantId)}>
+                    <Button
+                      variant="subtle"
+                      size="xs"
+                      color="red"
+                      onClick={() => onRemoveFixedSeat(fs.participantId)}
+                    >
                       해제
                     </Button>
                   </Group>
                 </Card>
               ))
             ) : (
-              <Text size="xs" c="dimmed">지정된 고정석이 없습니다.</Text>
+              <Text size="xs" c="dimmed">
+                지정된 고정석이 없습니다.
+              </Text>
             )}
           </Stack>
         </Stack>
       </Card>
 
-      <Accordion variant="contained" radius="md">
-        <Accordion.Item value="seat-editor">
-          <Accordion.Control>좌석 직접 편집</Accordion.Control>
-          <Accordion.Panel>
-            <Stack gap="sm">
+      <Card withBorder radius="md" p="sm">
+        <Stack gap="sm">
+          <Group justify="space-between">
+            <Text fw={700} size="sm">
+              좌석 직접 편집
+            </Text>
+            <Text size="xs" c="dimmed">
+              현재 {usableSeatCount}석
+            </Text>
+          </Group>
+          <Text size="xs" c="dimmed">
+            각 칸을 클릭하면 좌석 → 통로 → 비활성 순으로 바뀝니다.
+          </Text>
+          <Stack gap={4}>
+            <Group gap="xs">
+              <Badge color="orange" variant="light" size="sm">
+                좌석
+              </Badge>
               <Text size="xs" c="dimmed">
-                각 칸을 클릭하면 좌석 → 통로 → 비활성 순으로 바뀝니다.
+                학생이 배정되는 실제 자리
               </Text>
-              <Stack gap={4}>
-                <Group gap="xs">
-                  <Badge color="orange" variant="light" size="sm">좌석</Badge>
-                  <Text size="xs" c="dimmed">학생이 배정되는 실제 자리</Text>
-                </Group>
-                <Group gap="xs">
-                  <Badge color="gray" variant="light" size="sm">통로</Badge>
-                  <Text size="xs" c="dimmed">자리 번호는 건너뛰고 배정 제외</Text>
-                </Group>
-                <Group gap="xs">
-                  <Badge color="red" variant="light" size="sm">비활성</Badge>
-                  <Text size="xs" c="dimmed">없는 셈 치고 배정 제외</Text>
-                </Group>
-              </Stack>
-              <div
-                className="grid gap-1.5"
-                style={{ gridTemplateColumns: `repeat(${seatConfig.columns}, minmax(56px, 1fr))` }}
-              >
-                {seatConfig.layout.cells.map((cell) => {
-                  const nextType = cell.type === 'seat' ? '통로' : cell.type === 'aisle' ? '비활성' : '좌석'
-                  return (
-                    <Button
-                      key={cell.id}
-                      variant="light"
-                      color={cell.type === 'seat' ? 'orange' : cell.type === 'aisle' ? 'gray' : 'red'}
-                      size="xs"
-                      h="auto"
-                      p={4}
-                      onClick={() => onCycleCellType(cell.id)}
-                      aria-label={`${cell.label} ${cell.type === 'seat' ? '좌석' : cell.type === 'aisle' ? '통로' : '비활성'}, 클릭하여 ${nextType}로 변경`}
-                      style={{ minHeight: 56 }}
-                    >
-                      <Stack gap={0} align="center">
-                        <Text size="xs" fw={700}>{cell.label}</Text>
-                        <Text size="xs" c="dimmed">
-                          {cell.type === 'seat' ? '좌석' : cell.type === 'aisle' ? '통로' : '비활성'}
-                        </Text>
-                      </Stack>
-                    </Button>
-                  )
-                })}
-              </div>
-            </Stack>
-          </Accordion.Panel>
-        </Accordion.Item>
-      </Accordion>
-
-      <Text size="xs" c="dimmed">
-        현재 좌석 {usableSeatCount}석, 통로/비활성은 필요할 때만 편집합니다.
-      </Text>
-
-      <Button
-        variant="subtle"
-        color="red"
-        size="xs"
-        onClick={() =>
-          modals.openConfirmModal({
-            title: '전체 저장 데이터 삭제',
-            children: (
-              <Text size="sm">
-                현재 초안과 저장된 모든 템플릿, 이력이 지워집니다.
-                <br />
-                이 동작은 되돌릴 수 없습니다.
+            </Group>
+            <Group gap="xs">
+              <Badge color="gray" variant="light" size="sm">
+                통로
+              </Badge>
+              <Text size="xs" c="dimmed">
+                자리 번호는 건너뛰고 배정 제외
               </Text>
-            ),
-            labels: { confirm: '전부 삭제', cancel: '취소' },
-            confirmProps: { color: 'red' },
-            onConfirm: onClearAllStorage,
-          })
-        }
-      >
-        전체 저장 삭제
-      </Button>
+            </Group>
+            <Group gap="xs">
+              <Badge color="red" variant="light" size="sm">
+                비활성
+              </Badge>
+              <Text size="xs" c="dimmed">
+                없는 셈 치고 배정 제외
+              </Text>
+            </Group>
+          </Stack>
+          <div
+            className="grid gap-1.5"
+            style={{
+              gridTemplateColumns: `repeat(${seatConfig.columns}, minmax(56px, 1fr))`,
+            }}
+          >
+            {seatConfig.layout.cells.map((cell) => {
+              const nextType =
+                cell.type === 'seat'
+                  ? '통로'
+                  : cell.type === 'aisle'
+                    ? '비활성'
+                    : '좌석'
+              return (
+                <Button
+                  key={cell.id}
+                  variant="light"
+                  color={
+                    cell.type === 'seat'
+                      ? 'orange'
+                      : cell.type === 'aisle'
+                        ? 'gray'
+                        : 'red'
+                  }
+                  size="xs"
+                  h="auto"
+                  p={4}
+                  onClick={() => onCycleCellType(cell.id)}
+                  aria-label={`${cell.label} ${
+                    cell.type === 'seat'
+                      ? '좌석'
+                      : cell.type === 'aisle'
+                        ? '통로'
+                        : '비활성'
+                  }, 클릭하여 ${nextType}로 변경`}
+                  style={{ minHeight: 56 }}
+                >
+                  <Stack gap={0} align="center">
+                    <Text size="xs" fw={700}>
+                      {cell.label}
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      {cell.type === 'seat'
+                        ? '좌석'
+                        : cell.type === 'aisle'
+                          ? '통로'
+                          : '비활성'}
+                    </Text>
+                  </Stack>
+                </Button>
+              )
+            })}
+          </div>
+        </Stack>
+      </Card>
+
+      <Card withBorder radius="md" p="sm">
+        <Stack gap="sm">
+          <Group justify="space-between">
+            <Text fw={700} size="sm">
+              데이터 관리
+            </Text>
+            <Text size="xs" c="dimmed">
+              보조 도구
+            </Text>
+          </Group>
+          <Text size="xs" c="dimmed">
+            현재 초안 초기화는 왼쪽 자리 뽑기 카드에서 처리하고, 아래 삭제는 저장된
+            전체 데이터를 지웁니다.
+          </Text>
+          <Group gap="xs" wrap="wrap">
+            <Button
+              variant="light"
+              color="gray"
+              size="xs"
+              leftSection={
+                isDark ? <IoSunnyOutline size={16} /> : <IoMoonOutline size={16} />
+              }
+              onClick={toggleColorScheme}
+            >
+              {isDark ? '라이트 모드' : '다크 모드'}
+            </Button>
+            <Button
+              variant="light"
+              color="gray"
+              size="xs"
+              leftSection={<IoKeypadOutline size={16} />}
+              onClick={onOpenShortcuts}
+            >
+              단축키 보기
+            </Button>
+          </Group>
+          <Button
+            variant="subtle"
+            color="red"
+            size="xs"
+            onClick={() =>
+              modals.openConfirmModal({
+                title: '전체 저장 데이터 삭제',
+                children: (
+                  <Text size="sm">
+                    현재 초안과 저장된 모든 템플릿, 이력이 지워집니다.
+                    <br />
+                    이 동작은 되돌릴 수 없습니다.
+                  </Text>
+                ),
+                labels: { confirm: '전부 삭제', cancel: '취소' },
+                confirmProps: { color: 'red' },
+                onConfirm: onClearAllStorage,
+              })
+            }
+          >
+            전체 저장 삭제
+          </Button>
+        </Stack>
+      </Card>
     </Stack>
   )
 }

@@ -49,9 +49,6 @@ export type SeatStoreState = {
   fixedCellId: string
   isTemplateDrawerOpen: boolean
   isHistoryDrawerOpen: boolean
-  isSettingsDrawerOpen: boolean
-  isAdvancedOpen: boolean
-  isSeatEditorOpen: boolean
   isRedrawPickerOpen: boolean
   drawTimerId: number | null
 }
@@ -68,8 +65,6 @@ export type SeatStoreActions = {
   onAvoidPreviousSeatChange: (checked: boolean) => void
   onBalanceZonesChange: (checked: boolean) => void
   onContinuousNumberingChange: (checked: boolean) => void
-  onToggleAdvanced: () => void
-  onToggleSeatEditor: () => void
   onRunDraw: (redrawMode: 'all' | 'selected') => void
   onResetCurrentDraft: () => void
   onClearAllStorage: () => void
@@ -87,7 +82,6 @@ export type SeatStoreActions = {
   onLoadHistory: (entry: DrawHistoryEntry) => void
   onOpenTemplateDrawer: () => void
   onOpenHistoryDrawer: () => void
-  onOpenSettingsDrawer: () => void
   onCloseDrawers: () => void
   _clearDrawTimer: () => void
 }
@@ -140,9 +134,6 @@ function loadInitialState(): SeatStoreState {
     fixedCellId: '',
     isTemplateDrawerOpen: false,
     isHistoryDrawerOpen: false,
-    isSettingsDrawerOpen: false,
-    isAdvancedOpen: false,
-    isSeatEditorOpen: false,
     isRedrawPickerOpen: false,
     drawTimerId: null,
   }
@@ -296,9 +287,6 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
           set((state) => ({
             drawSettings: { ...state.drawSettings, continuousNumbering: checked },
           })),
-
-        onToggleAdvanced: () => set((state) => ({ isAdvancedOpen: !state.isAdvancedOpen })),
-        onToggleSeatEditor: () => set((state) => ({ isSeatEditorOpen: !state.isSeatEditorOpen })),
 
         onRunDraw: (redrawMode) => {
           set({ errorMessage: '', statusMessage: '' })
@@ -578,16 +566,13 @@ export function createSeatStore(browser: BrowserApi = defaultBrowserApi) {
         },
 
         onOpenTemplateDrawer: () =>
-          set({ isTemplateDrawerOpen: true, isHistoryDrawerOpen: false, isSettingsDrawerOpen: false }),
+          set({ isTemplateDrawerOpen: true, isHistoryDrawerOpen: false }),
 
         onOpenHistoryDrawer: () =>
-          set({ isHistoryDrawerOpen: true, isTemplateDrawerOpen: false, isSettingsDrawerOpen: false }),
-
-        onOpenSettingsDrawer: () =>
-          set({ isSettingsDrawerOpen: true, isTemplateDrawerOpen: false, isHistoryDrawerOpen: false }),
+          set({ isHistoryDrawerOpen: true, isTemplateDrawerOpen: false }),
 
         onCloseDrawers: () =>
-          set({ isTemplateDrawerOpen: false, isHistoryDrawerOpen: false, isSettingsDrawerOpen: false }),
+          set({ isTemplateDrawerOpen: false, isHistoryDrawerOpen: false }),
 
         _clearDrawTimer: () => clearDrawTimer(),
       }

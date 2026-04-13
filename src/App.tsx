@@ -1,6 +1,7 @@
 import { useHotkeys } from '@mantine/hooks'
 import { modals } from '@mantine/modals'
 import { useEffect } from 'react'
+import { AdvancedSettingsPanel } from './components/AdvancedSettingsPanel'
 import { AppHeader } from './components/AppHeader'
 import { DrawerOverlay } from './components/DrawerOverlay'
 import { DrawActionPanel } from './components/DrawActionPanel'
@@ -66,14 +67,15 @@ function App() {
   ])
 
   return (
-    <div className="mx-auto grid min-h-screen w-[min(1520px,calc(100%-28px))] grid-rows-[auto_1fr] gap-3 pt-16 pb-3 antialiased max-[900px]:w-[min(calc(100%-20px),1520px)] max-[900px]:pt-40 print:block print:min-h-auto print:w-full print:bg-white print:p-0">
-      <AppHeader onOpenShortcuts={openShortcutsModal} />
+    <div className="mx-auto grid min-h-screen w-[min(1520px,calc(100%-28px))] grid-rows-[auto_1fr] gap-3 pt-[5.25rem] pb-3 antialiased max-[900px]:w-[min(calc(100%-20px),1520px)] max-[900px]:pt-[7.75rem] print:block print:min-h-auto print:w-full print:bg-white print:p-0">
+      <AppHeader />
 
       <main className="grid min-h-0 gap-3 grid-cols-[minmax(360px,430px)_minmax(0,1fr)] max-[1280px]:grid-cols-1 print:block print:min-h-auto print:w-full print:gap-0">
         <aside className="grid min-h-0 auto-rows-max gap-3 print:hidden">
           <ParticipantInputPanel />
           <SeatConfigPanel />
           <DrawActionPanel />
+          <AdvancedSettingsPanel onOpenShortcuts={openShortcutsModal} />
         </aside>
 
         <ResultPanel />

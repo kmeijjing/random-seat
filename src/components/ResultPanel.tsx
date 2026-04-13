@@ -3,7 +3,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { toPng } from "html-to-image";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { IoBookmarkOutline, IoCopyOutline, IoImageOutline, IoPrintOutline, IoSearchOutline, IoShuffleOutline } from "react-icons/io5";
 import { useShallow } from "zustand/react/shallow";
 import { selectSeatNumberMap } from "../store/seatSelectors";
@@ -42,6 +42,7 @@ export function ResultPanel() {
     if (participantId) {
       onAddFixedSeat({ participantId, cellId });
     }
+    setActiveDropCellId(null);
   };
 
   const handleSeatDragOver = (e: React.DragEvent) => {
@@ -51,7 +52,19 @@ export function ResultPanel() {
     }
   };
 
+  const handleSeatDragEnter = (e: React.DragEvent, cellId: string) => {
+    if (e.dataTransfer.types.includes("text/seat-participant-id")) {
+      e.preventDefault();
+      setActiveDropCellId(cellId);
+    }
+  };
+
+  const handleSeatDragLeave = (cellId: string) => {
+    setActiveDropCellId((current) => current === cellId ? null : current);
+  };
+
   const isDesktop = useMediaQuery("(min-width: 1280px)");
+  const [activeDropCellId, setActiveDropCellId] = useState<string | null>(null);
 
   const handleGoToInput = () => {
     const el = document.getElementById("participant-input-textarea");
@@ -135,6 +148,9 @@ export function ResultPanel() {
   );
 
   const hasAssignments = assignments.length > 0;
+  const redrawButtonLabel = selectedParticipantsForRedraw.length > 0
+    ? `선택한 ${selectedParticipantsForRedraw.length}명 다시 뽑기`
+    : "선택한 학생 다시 뽑기";
 
   return (
     <Card shadow="sm" radius="lg" withBorder className="min-h-0 overflow-hidden grid grid-rows-[auto_1fr] print:block print:border-0 print:shadow-none">
@@ -146,39 +162,53 @@ export function ResultPanel() {
               {hasAssignments ? `${assignments.length}명 배정` : "결과 대기"}
             </Badge>
           </Group>
-          <TextInput
-            placeholder="학생 이름 검색"
-            value={searchQuery}
-            onChange={(e) => onSearchQueryChange(e.currentTarget.value)}
-            leftSection={<IoSearchOutline />}
-            size="xs"
-            disabled={!hasAssignments}
-            className="print:hidden"
-            style={{ flex: "0 1 220px" }}
-          />
+          {hasAssignments && (
+            <TextInput
+              placeholder="학생 이름 검색"
+              value={searchQuery}
+              onChange={(e) => onSearchQueryChange(e.currentTarget.value)}
+              leftSection={<IoSearchOutline />}
+              size="xs"
+              className="print:hidden"
+              style={{ flex: "0 1 220px" }}
+            />
+          )}
         </Group>
 
         {hasAssignments ? (
           <>
             <Card withBorder radius="md" p="xs" className="bg-surface-warm print:hidden">
-              <Group justify="space-between">
-                <Text size="xs" c="dimmed">마지막 결과: {updatedAtLabel}</Text>
-                <Text size="xs" c="dimmed">
-                  {drawSettings.avoidPreviousSeat ? "지난 자리 피하기" : "완전 랜덤"}
-                  {" · "}
-                  {drawSettings.balanceZones ? "자리 편중 줄이기" : "균형 옵션 꺼짐"}
-                </Text>
-              </Group>
+              <Stack gap={6}>
+                <Group justify="space-between" wrap="wrap" gap="xs">
+                  <Text size="xs" c="dimmed">마지막 결과: {updatedAtLabel}</Text>
+                  <Text size="xs" c="dimmed">
+                    {drawSettings.avoidPreviousSeat ? "지난 자리 피하기" : "완전 랜덤"}
+                    {" · "}
+                    {drawSettings.balanceZones ? "자리 편중 줄이기" : "균형 옵션 꺼짐"}
+                  </Text>
+                </Group>
+                {fixedSeats.length > 0 && (
+                  <Text size="xs" c="dimmed">
+                    고정석 {fixedSeats.length}건 · 주황 강조 카드가 고정석입니다.
+                  </Text>
+                )}
+              </Stack>
             </Card>
 
             <Group gap="xs" justify="space-between" wrap="wrap" className="print:hidden">
               <Group gap="xs">
-                <Button variant="light" color="gray" size="xs" onClick={() => onRunDraw("all")} disabled={isDrawing}>
+                <Button
+                  variant="gradient"
+                  gradient={{ from: "orange.6", to: "orange.3", deg: 135 }}
+                  size="xs"
+                  onClick={() => onRunDraw("all")}
+                  disabled={isDrawing}
+                >
                   전체 다시 뽑기
                 </Button>
                 <Tooltip label="선택한 학생들만 다시 배정합니다 (고정석 제외)" withArrow>
                   <Button
-                    variant="light"
+                    variant={isRedrawPickerOpen ? "filled" : "light"}
                     color="gray"
                     size="xs"
                     leftSection={<IoShuffleOutline />}
@@ -243,9 +273,14 @@ export function ResultPanel() {
                     <Group gap="xs">
                       <Button variant="subtle" size="xs" onClick={onSelectAllForRedraw}>전체 선택</Button>
                       <Button variant="subtle" size="xs" onClick={onDeselectAllForRedraw}>전체 해제</Button>
-                      <Text size="xs" c="dimmed">{selectedParticipantsForRedraw.length}명 선택</Text>
+                      <Badge color="orange" variant="light">
+                        {selectedParticipantsForRedraw.length}명 선택
+                      </Badge>
                     </Group>
                   </Group>
+                  <Text size="xs" c="dimmed">
+                    선택하지 않은 학생과 고정석은 그대로 유지됩니다.
+                  </Text>
                   <Group gap="xs" role="group" aria-label="다시 뽑을 학생 목록">
                     {redrawCandidates.map((assignment) => (
                       <Checkbox
@@ -262,9 +297,9 @@ export function ResultPanel() {
                     gradient={{ from: "orange.6", to: "orange.3", deg: 135 }}
                     size="sm"
                     onClick={() => onRunDraw("selected")}
-                    disabled={isDrawing}
+                    disabled={isDrawing || selectedParticipantsForRedraw.length === 0}
                   >
-                    선택한 학생만 다시 뽑기
+                    {redrawButtonLabel}
                   </Button>
                 </Stack>
               </Card>
@@ -284,6 +319,8 @@ export function ResultPanel() {
                   const isSearchMatch = matchingCellIds.has(cell.id);
                   const fixedSeat = fixedSeats.find((item) => item.cellId === cell.id);
                   const seatNumber = seatNumberMap.get(cell.id);
+                  const hasParticipant = Boolean(assignment?.participant);
+                  const isDropActive = activeDropCellId === cell.id;
                   const primaryLabel = drawSettings.continuousNumbering && seatNumber
                     ? `${seatNumber}번`
                     : cell.label;
@@ -312,18 +349,40 @@ export function ResultPanel() {
                       withBorder
                       radius="md"
                       p="xs"
-                      className={`seat-card-animate ${assignment?.isFixed ? "bg-surface-warm-strong" : "bg-surface-warm"}`}
+                      className={`seat-card-animate ${
+                        assignment?.isFixed
+                          ? "bg-surface-warm-strong seat-card-fixed"
+                          : hasParticipant
+                            ? "bg-surface-warm"
+                            : "bg-surface-empty seat-card-empty"
+                      } ${isDropActive ? "seat-card-drop-active" : ""}`}
+                      onDragEnter={(e) => handleSeatDragEnter(e, cell.id)}
                       onDragOver={handleSeatDragOver}
+                      onDragLeave={() => handleSeatDragLeave(cell.id)}
                       onDrop={(e) => handleSeatDrop(e, cell.id)}
                       style={{
                         minHeight: 96,
                         animationDelay,
-                        borderColor: assignment?.isFixed ? "var(--mantine-color-orange-3)" : isSearchMatch ? "var(--mantine-color-orange-4)" : undefined,
-                        outline: isSearchMatch ? "3px solid var(--mantine-color-orange-2)" : undefined,
+                        borderColor: assignment?.isFixed
+                          ? "var(--mantine-color-orange-3)"
+                          : isDropActive
+                            ? "var(--mantine-color-orange-5)"
+                            : isSearchMatch
+                              ? "var(--mantine-color-orange-4)"
+                              : undefined,
+                        outline: isDropActive
+                          ? "3px solid var(--mantine-color-orange-3)"
+                          : isSearchMatch
+                            ? "3px solid var(--mantine-color-orange-2)"
+                            : undefined,
                       }}
                     >
-                      <Text size="xs" fw={800} c="orange.7">{primaryLabel}</Text>
-                      <Text fw={600} size="sm">{assignment?.participant?.displayName ?? "빈자리"}</Text>
+                      <Text size="xs" fw={800} c={hasParticipant || assignment?.isFixed ? "orange.7" : "gray.6"}>
+                        {primaryLabel}
+                      </Text>
+                      <Text fw={hasParticipant ? 600 : 500} size="sm" c={hasParticipant ? undefined : "dimmed"}>
+                        {assignment?.participant?.displayName ?? "빈자리"}
+                      </Text>
                       <Text size="xs" c="dimmed">
                         {drawSettings.continuousNumbering ? `칸 ${cell.label}` : `${seatNumber}번 자리`}
                         {fixedSeat ? " · 고정석" : ""}
