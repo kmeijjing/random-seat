@@ -1,10 +1,10 @@
-import { Badge, Button, Card, Checkbox, Divider, Group, Stack, Text, TextInput, Title, Tooltip } from "@mantine/core";
+import { Badge, Button, Card, Checkbox, Group, Menu, Stack, Text, TextInput, Title, Tooltip } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { toPng } from "html-to-image";
 import { useMemo, useRef, useState } from "react";
-import { IoBookmarkOutline, IoCopyOutline, IoImageOutline, IoPrintOutline, IoSearchOutline, IoShuffleOutline } from "react-icons/io5";
+import { IoBookmarkOutline, IoCopyOutline, IoEllipsisHorizontal, IoImageOutline, IoPrintOutline, IoSearchOutline, IoShuffleOutline } from "react-icons/io5";
 import { useShallow } from "zustand/react/shallow";
 import { selectSeatNumberMap } from "../store/seatSelectors";
 import { useSeatStore } from "../store/seatStore";
@@ -187,11 +187,12 @@ export function ResultPanel() {
                     {drawSettings.balanceZones ? "자리 편중 줄이기" : "균형 옵션 꺼짐"}
                   </Text>
                 </Group>
-                {fixedSeats.length > 0 && (
-                  <Text size="xs" c="dimmed">
-                    고정석 {fixedSeats.length}건 · 주황 강조 카드가 고정석입니다.
-                  </Text>
-                )}
+                <Text size="xs" c="dimmed">
+                  {fixedSeats.length > 0
+                    ? `고정석 ${fixedSeats.length}건 · 주황 강조 카드가 고정석입니다. `
+                    : ""}
+                  학생 이름을 좌석으로 드래그해 고정석으로 저장할 수 있습니다.
+                </Text>
               </Stack>
             </Card>
 
@@ -219,50 +220,46 @@ export function ResultPanel() {
                   </Button>
                 </Tooltip>
               </Group>
-              <Divider orientation="vertical" className="max-[900px]:hidden" />
-              <Group gap="xs">
-                <Button
-                  variant="subtle"
-                  color="gray"
-                  size="xs"
-                  leftSection={<IoCopyOutline />}
-                  onClick={onCopyResult}
-                  disabled={!hasAssignments}
-                >
-                  복사
-                </Button>
-                <Button
-                  variant="subtle"
-                  color="gray"
-                  size="xs"
-                  leftSection={<IoImageOutline />}
-                  onClick={handlePngExport}
-                  disabled={!hasAssignments}
-                >
-                  이미지
-                </Button>
-                <Button
-                  variant="subtle"
-                  color="gray"
-                  size="xs"
-                  leftSection={<IoPrintOutline />}
-                  onClick={openPrintPreviewModal}
-                  disabled={!hasAssignments}
-                >
-                  인쇄
-                </Button>
-                <Tooltip label="현재 명단·좌석·고정석을 템플릿으로 저장" withArrow>
+              <Menu shadow="md" width={190} position="bottom-end" withinPortal>
+                <Menu.Target>
                   <Button
                     variant="subtle"
-                    color="orange"
+                    color="gray"
                     size="xs"
-                    leftSection={<IoBookmarkOutline />}
+                    leftSection={<IoEllipsisHorizontal />}
+                  >
+                    더보기
+                  </Button>
+                </Menu.Target>
+
+                <Menu.Dropdown>
+                  <Menu.Item
+                    leftSection={<IoCopyOutline size={16} />}
+                    onClick={onCopyResult}
+                  >
+                    복사
+                  </Menu.Item>
+                  <Menu.Item
+                    leftSection={<IoImageOutline size={16} />}
+                    onClick={handlePngExport}
+                  >
+                    이미지
+                  </Menu.Item>
+                  <Menu.Item
+                    leftSection={<IoPrintOutline size={16} />}
+                    onClick={openPrintPreviewModal}
+                  >
+                    인쇄
+                  </Menu.Item>
+                  <Menu.Item
+                    color="orange"
+                    leftSection={<IoBookmarkOutline size={16} />}
                     onClick={openSaveTemplateModal}
                   >
                     템플릿 저장
-                  </Button>
-                </Tooltip>
-              </Group>
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
             </Group>
 
             {isRedrawPickerOpen && (

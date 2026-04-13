@@ -12,6 +12,7 @@ import { modals } from "@mantine/modals";
 import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import {
+  getSeatCapacityFeedback,
   selectParticipants,
   selectUsableSeatCount,
 } from "../store/seatSelectors";
@@ -56,12 +57,16 @@ export function DrawActionPanel() {
       >[0]),
     [seatConfig],
   );
+  const capacityFeedback = useMemo(
+    () => getSeatCapacityFeedback(participants.length, usableSeatCount),
+    [participants.length, usableSeatCount],
+  );
 
   const disabledReason =
-    participants.length === 0
-      ? "먼저 명단을 입력해 주세요"
-      : participants.length > usableSeatCount
-        ? `좌석이 부족합니다 (참여자 ${participants.length}명 / 좌석 ${usableSeatCount}석)`
+    capacityFeedback.kind === "empty"
+      ? capacityFeedback.message
+      : capacityFeedback.kind === "insufficient"
+        ? `${capacityFeedback.message} (참여자 ${participants.length}명 / 좌석 ${usableSeatCount}석)`
         : null;
   const canDraw = disabledReason === null;
 

@@ -1,7 +1,7 @@
-import { Badge, Button, Card, Group, NumberInput, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { Alert, Badge, Button, Card, Group, NumberInput, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { selectParticipants, selectRecommendedLayouts, selectUsableSeatCount } from "../store/seatSelectors";
+import { getSeatCapacityFeedback, selectParticipants, selectRecommendedLayouts, selectUsableSeatCount } from "../store/seatSelectors";
 import { useSeatStore } from "../store/seatStore";
 
 export function SeatConfigPanel() {
@@ -25,6 +25,10 @@ export function SeatConfigPanel() {
   const recommendedLayouts = useMemo(
     () => selectRecommendedLayouts(participants.length),
     [participants.length],
+  );
+  const capacityFeedback = useMemo(
+    () => getSeatCapacityFeedback(participants.length, usableSeatCount),
+    [participants.length, usableSeatCount],
   );
 
   return (
@@ -82,6 +86,16 @@ export function SeatConfigPanel() {
               <Text fw={600}>{Math.max(usableSeatCount - participants.length, 0)}석</Text>
             </div>
           </SimpleGrid>
+          <Alert
+            mt="sm"
+            p="xs"
+            radius="md"
+            variant="light"
+            color={capacityFeedback.color}
+            title="현재 상태"
+          >
+            <Text size="xs">{capacityFeedback.message}</Text>
+          </Alert>
         </Card>
       </Stack>
     </Card>

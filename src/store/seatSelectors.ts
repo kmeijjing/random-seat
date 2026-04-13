@@ -8,6 +8,12 @@ import {
 import { findDuplicateNames, parseParticipants } from '../utils/participants'
 import type { SeatStoreState } from './seatStore'
 
+export type SeatCapacityFeedback = {
+  kind: 'empty' | 'insufficient' | 'exact' | 'available'
+  message: string
+  color: 'gray' | 'red' | 'teal'
+}
+
 export function selectParticipants(state: SeatStoreState): Participant[] {
   return parseParticipants(state.participantInput)
 }
@@ -18,6 +24,41 @@ export function selectDuplicateNames(participants: Participant[]): string[] {
 
 export function selectRecommendedLayouts(participantCount: number): SeatRecommendation[] {
   return getRecommendedLayouts(participantCount)
+}
+
+export function getSeatCapacityFeedback(
+  participantCount: number,
+  usableSeatCount: number,
+): SeatCapacityFeedback {
+  if (participantCount === 0) {
+    return {
+      kind: 'empty',
+      message: '명단을 먼저 입력해 주세요',
+      color: 'gray',
+    }
+  }
+
+  if (participantCount > usableSeatCount) {
+    return {
+      kind: 'insufficient',
+      message: '좌석이 부족합니다. 좌석을 늘리거나 명단을 줄여야 합니다',
+      color: 'red',
+    }
+  }
+
+  if (participantCount === usableSeatCount) {
+    return {
+      kind: 'exact',
+      message: '바로 자리 뽑기 가능한 상태입니다',
+      color: 'teal',
+    }
+  }
+
+  return {
+    kind: 'available',
+    message: `바로 자리 뽑기 가능 · 여유 좌석 ${usableSeatCount - participantCount}석`,
+    color: 'teal',
+  }
 }
 
 export function selectUsableSeatCount(state: SeatStoreState): number {
