@@ -9,6 +9,7 @@ import {
   Text,
   Textarea,
   Title,
+  Tooltip,
 } from "@mantine/core";
 import { useMemo } from "react";
 import { IoWarningOutline } from "react-icons/io5";
@@ -18,6 +19,7 @@ import {
   selectParticipants,
 } from "../store/seatSelectors";
 import { useSeatStore } from "../store/seatStore";
+import { LiaInfoCircleSolid } from "react-icons/lia";
 
 export function ParticipantInputPanel() {
   const { participantInput, onParticipantInputChange } = useSeatStore(
@@ -42,10 +44,13 @@ export function ParticipantInputPanel() {
   return (
     <Accordion.Item value={"명단 입력"}>
       <Accordion.Control>
-        <Group>
+        <Group gap={4}>
           <Title order={5} c="blue.7">
             1. 명단 입력
           </Title>
+          <Tooltip label="줄바꿈, 쉼표, 탭 입력을 자동 정리합니다." withArrow>
+            <LiaInfoCircleSolid className="text-lime-500" />
+          </Tooltip>
           <Badge variant="light">{participants.length}명</Badge>
         </Group>
       </Accordion.Control>

@@ -93,13 +93,14 @@ function App() {
     <div className="mx-auto grid h-screen antialiased pt-14">
       <AppHeader />
 
-      <main className="px-4 grid min-h-0 h-full items-start overflow-y-auto overflow-x-hidden gap-3 grid-cols-[minmax(360px,430px)_minmax(0,1fr)] print:block print:h-auto print:min-h-auto print:w-full print:gap-0">
-        <aside className="grid min-h-0 auto-rows-max gap-3 print:hidden py-4">
+      <main className="px-4 min-[961px]:grid min-h-0 h-full items-start overflow-y-auto overflow-x-hidden gap-3 min-[961px]:grid-cols-[minmax(360px,430px)_minmax(0,1fr)] print:block print:h-auto print:min-h-auto print:w-full print:gap-0 pb-4">
+        <aside className="grid min-h-0 auto-rows-max gap-3 print:hidden pt-4 min-[961px]:pb-4">
           <Card radius="lg">
             <Accordion
-              variant="separated"
+              variant="contained"
               order={4}
               multiple
+              radius="lg"
               value={openSections}
               onChange={setOpenSections}
             >
